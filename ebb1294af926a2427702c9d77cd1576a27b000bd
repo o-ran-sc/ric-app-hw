@@ -1,0 +1,9 @@
+Verified+1: ORAN Jobbuilder <releng+oran-jobbuilder@linuxfoundation.org>
+Verified+1: Matti Hiltunen <hiltunen@att.com>
+Code-Review+1: Scott Daniels <daniels@research.att.com>
+Code-Review+2: Matti Hiltunen <hiltunen@att.com>
+Submitted-by: Matti Hiltunen <hiltunen@att.com>
+Submitted-at: Wed, 18 Mar 2020 17:28:39 +0000
+Reviewed-on: https://gerrit.o-ran-sc.org/r/c/ric-app/hw/+/2650
+Project: ric-app/hw
+Branch: refs/heads/master
