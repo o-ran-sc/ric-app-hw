@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5c3b2709_7de58498",
+        "filename": "src/xapp-mgmt/xapp_handler.hpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-03-19T16:42:48Z",
+      "side": 1,
+      "message": "missing license",
+      "revId": "04a2221b2f592bb3416abf02cb092f44945f237a",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
