@@ -2,6 +2,7 @@ newrt|start
 rte|0|localhost:4560
 rte|2|localhost:38000
 rte|100|localhost:4560
+rte|101|localhost:4560
 rte|10002|localhost:4560
 rte|10005|localhost:4560
 rte|10003|localhost:38000
