@@ -32,46 +32,67 @@
 #include <memory>
 #include <csignal>
 #include <stdio.h>
+#include <pthread.h>
+#include <unordered_map>
 #include "xapp_rmr.hpp"
 #include "xapp_sdl.hpp"
 #include "rapidjson/writer.h"
-
+#include "rapidjson/document.h"
 #include "msgs_proc.hpp"
 #include "subs_mgmt.hpp"
 #include "xapp_config.hpp"
-//#include "rnib/rnibreader.h"
-
-
+extern "C" {
+#include "rnib/rnibreader.h"
+}
 using namespace std;
 using namespace std::placeholders;
+using namespace rapidjson;
+
+using callback_type = std::function< void(rmr_mbuf_t*,bool*) > ;
 
 class Xapp{
 public:
 
   Xapp(XappSettings &, XappRmr &);
-  Xapp(XappSettings &, XappRmr &, XappSDL &);
   ~Xapp(void);
 
   void startup();
   void shutdown(void);
-
-  void start_xapp_receiver();
+  void init(void);
+  void start_xapp_receiver(XappMsgHandler &);
+  void sdl_data(void);
 
   Xapp(Xapp const &)=delete;
   Xapp& operator=(Xapp const &) = delete;
+
+  template<typename FunctionObject>
+  void register_handler(FunctionObject fn){
+	  _callbacks.emplace_back(fn);
+  }
+
+  void callback_handler(){
+
+  }
+
+  void set_rnib_gnblist(void);
+  //getters/setters.
+  std::vector<std::string> get_rnib_gnblist(){ return rnib_gnblist; }
 
 private:
   void startup_subscribe_requests(void );
   void shutdown_subscribe_deletes(void);
   void startup_get_policies(void );
-  void sdl_data(void);
-  void rnib_data(void);
+
 
   XappRmr * rmr_ref;
   XappSettings * config_ref;
-  XappSDL *sdl_ref = NULL;
+
   std::mutex *xapp_mutex;
   std::vector<std::thread> xapp_rcv_thread;
+  std::vector<std::string> rnib_gnblist;
+
+  std::vector<callback_type> _callbacks;
+
 };
 
 
