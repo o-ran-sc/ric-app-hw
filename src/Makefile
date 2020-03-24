@@ -1,5 +1,5 @@
-CXX:= g++ --std=c++14 -O2
-CC:= gcc -O2
+CXX:= g++ --std=c++14 -O2 -L/usr/local/lib
+CC:= gcc -O2 -L/usr/local/lib
 
 SRC:=./
 HWSRC:=./
@@ -14,9 +14,11 @@ E2SMSRC:=./xapp-asn/e2sm
 CLOGFLAGS:= `pkg-config mdclog --cflags`
 LOG_LIBS:= `pkg-config mdclog --libs`
 CURL_LIBS:= `pkg-config libcurl --libs`
-
+RNIB_LIBS:= -pthread /usr/local/lib/rnibreader.a
 ######## Keep include dirs separate so we have transparency
-BASEFLAGS=  -Wall  -std=c++14 $(CLOGFLAGS) 
+
+
+BASEFLAGS=  -Wall -std=c++14 $(CLOGFLAGS) 
 C_BASEFLAGS= -Wall $(CLOGFLAGS) -DASN_DISABLE_OER_SUPPORT
 
 XAPPFLAGS= -I./
@@ -29,7 +31,8 @@ E2APFLAGS = -I$(E2APSRC)
 E2SMFLAGS = -I$(E2SMSRC)
 
 ########libs
-LIBS= -lsdl -lrmr_nng  -lnng -lpthread -lm $(LOG_LIBS) $(CURL_LIBS) 
+
+LIBS= -lsdl -lrmr_nng  -lnng -lpthread -lm $(LOG_LIBS) $(CURL_LIBS) $(RNIB_LIBS)
 COV_FLAGS= -fprofile-arcs -ftest-coverage
 
 #######
@@ -67,10 +70,10 @@ OBJ= $(HWXAPP_OBJ) $(UTIL_OBJ) $(MSG_OBJ)  $(ASN1C_MODULES) $(E2AP_OBJ) $(E2SM_O
 print-%  : ; @echo $* = $($*)
 
 hw_xapp_main: $(OBJ)
-	$(CXX) -o $@  $(OBJ) $(LIBS) $(CPPFLAGS) $(CLOGFLAGS) 
+	$(CXX) -o $@  $(OBJ) $(LIBS) $(RNIBFLAGS) $(CPPFLAGS) $(CLOGFLAGS) 
 
 install: hw_xapp_main
 	install  -D hw_xapp_main  /usr/local/bin/hw_xapp_main
 
 clean:
-	-rm *.o $(ASNSRC)/*.o $(E2APSRC)/*.o $(UTILSRC)/*.o $(E2SMSRC)/*.o  $(MSGSRC)/*.o $(SRC)/*.o hw_xapp_main 
+	-rm *.o $(ASNSRC)/*.o  $(E2APSRC)/*.o $(UTILSRC)/*.o $(E2SMSRC)/*.o  $(MSGSRC)/*.o $(SRC)/*.o hw_xapp_main 
