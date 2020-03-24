@@ -51,7 +51,7 @@ private:
 	size_t* message_length;
 
 public:
-	 rmr_mbuf_t * operator() (rmr_mbuf_t *);
+	 void operator() (rmr_mbuf_t *, bool*);
 
 	 bool encode_subscription_request(unsigned char*, size_t* );
 	 bool encode_subscription_delete_request(unsigned char*, size_t* );

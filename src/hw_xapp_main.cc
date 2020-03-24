@@ -22,8 +22,6 @@
  */
 
 #include "xapp.hpp"
-#include "subscription_request.hpp"
-#include "xapp_sdl.hpp"
 
 void signalHandler( int signum ) {
    cout << "Interrupt signal (" << signum << ") received.\n";
@@ -32,6 +30,15 @@ void signalHandler( int signum ) {
 
 int main(int argc, char *argv[]){
 
+	// Get the thread id
+	std::thread::id my_id = std::this_thread::get_id();
+	std::stringstream thread_id;
+	std::stringstream ss;
+
+	thread_id << my_id;
+
+	mdclog_write(MDCLOG_INFO, "Starting thread %s",  thread_id.str().c_str());
+
 	//get configuration
 	XappSettings config;
 	//change the priority depending upon application requirement
@@ -39,52 +46,49 @@ int main(int argc, char *argv[]){
 	config.loadEnvVarSettings();
 	config.loadCmdlineSettings(argc, argv);
 
-	//getting the listening port and xapp name info
-	std::string  port = config[XappSettings::SettingName::HW_PORTS];
-	std::string  name = config[XappSettings::SettingName::XAPP_NAME];
-
-
-	//initialize rmr
-	std::unique_ptr<XappRmr> rmr;
-	rmr = std::make_unique<XappRmr>(name,port);
-	rmr->xapp_rmr_init();
-
 	//Register signal handler to stop
 	signal(SIGINT, signalHandler);
 	signal(SIGTERM, signalHandler);
 
-	//Test SDL.
-	XappSDL sdl = XappSDL("hw-xapp");
+	//getting the listening port and xapp name info
+	std::string  port = config[XappSettings::SettingName::HW_PORTS];
+	std::string  name = config[XappSettings::SettingName::XAPP_NAME];
 
-	//Initiate the Xapp functionality
-	std::unique_ptr<Xapp> hw_xapp = std::make_unique<Xapp>(std::ref(config), std::ref(*rmr),std::ref(sdl));
-
-
-	//define the startup mode.
-	hw_xapp->startup();
-
-	//Register Callback Handlers
-	//Register E2 Msg Handlers - Subscription/Indication.
-	//Register A1 Msg Handlers.
-	//Register Callback Handlers
+	//initialize rmr
+	std::unique_ptr<XappRmr> rmr;
+	rmr = std::make_unique<XappRmr>(port);
+	rmr->xapp_rmr_init();
 
 
-	//start the receiver thread listening at HW_PORT
-	//currently only one receiver thread. In total how many receiver threads depend on the xapp developer.
-	//Register all the handlers required and start the receiver
+	std::unique_ptr<Xapp> hw_xapp = std::make_unique<Xapp>(std::ref(config),std::ref(*rmr));
 
-	//register_msgproc(RIC_SUB_RESP, sub_handler);
-	//register_msgproc(RIC_SUB_DEL_RESP, sub_handler);
-	//register_msgproc(RIC_SUB_FAILURE, sub_handler);
+	//register MsgHandler plugin for a received rmr_buffer
+	 std::unique_ptr<XappMsgHandler> mp_handler = std::make_unique<XappMsgHandler>();
+	 hw_xapp->register_handler(std::bind(&XappMsgHandler::operator (),mp_handler.get(),std::placeholders::_1,std::placeholders::_2));
 
+	 rmr->set_listen(true);
+	 hw_xapp->start_xapp_receiver(std::ref(*mp_handler));
 
-	hw_xapp->start_xapp_receiver();
- 	sleep(5);
+	 sleep(5);
 
 
 	//Delete all subscriptions if any based on Xapp Mode.
 	//xapp->shutdown();
 
+ 	xapp_rmr_header hdr;
+ 	hdr.message_type = RIC_HEALTH_CHECK_REQ;
+
+ 	char *strMsg = "HelloWorld: RMR Health Check\0";
+
+       clock_gettime(CLOCK_REALTIME, &(hdr.ts));
+       hdr.payload_length = strlen(strMsg);
+
+       bool res = rmr->xapp_rmr_send(&hdr,(void*)strMsg);
+
+       if (!res){
+    	   std::cout << "Xapp RMR Send Failure";
+       }
+       usleep(10);
 	 while(1){
 	 			sleep(1);
 	 		 }

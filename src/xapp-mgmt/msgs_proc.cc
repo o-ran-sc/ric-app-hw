@@ -232,11 +232,11 @@ bool XappMsgHandler::decode_subscription_delete_response_failure(unsigned char* 
 }
 
 //For processing received messages.
-rmr_mbuf_t * XappMsgHandler::operator()(rmr_mbuf_t *message){
+void XappMsgHandler::operator()(rmr_mbuf_t *message, bool *resend){
 
   if (message->len > MAX_RMR_RECV_SIZE){
     mdclog_write(MDCLOG_ERR, "Error : %s, %d, RMR message larger than %d. Ignoring ...", __FILE__, __LINE__, MAX_RMR_RECV_SIZE);
-    return message;
+    return;
   }
 
   switch(message->mtype){
@@ -244,38 +244,37 @@ rmr_mbuf_t * XappMsgHandler::operator()(rmr_mbuf_t *message){
   	  case (RIC_HEALTH_CHECK_REQ):
 		message->mtype = RIC_HEALTH_CHECK_RESP;        // if we're here we are running and all is ok
   	    message->sub_id = -1;
-	  break;
+  	  	strncpy( (char*)message->payload, "HELLOWORLD OK\n", rmr_payload_size( message) );
+  	    *resend = true;
+  	  break;
 
   	  case (RIC_SUB_RESP):
 		//Received Subscription Response Message
 		decode_subscription_response(message->payload,message->len);
-  	    message = NULL;
 	  break;
 
   	  case (RIC_SUB_DEL_RESP):
 		decode_subscription_delete_response(message->payload,message->len);
-	  	message = NULL;
   	  break;
 
   	  case (RIC_SUB_FAILURE):
 		decode_subscription_response_failure(message->payload, message->len);
-  	    message = NULL;
       break;
 
   	  case (RIC_SUB_DEL_FAILURE):
 		decode_subscription_delete_response_failure(message->payload,message->len);
-  	    message = NULL;
   	  break;
   	  //  case A1_POLICY_REQ:
   	 // break;
 
 
   default:
+	*resend = false;
     mdclog_write(MDCLOG_ERR, "Error :: Unknown message type %d received from RMR", message->mtype);
 
   }
 
-  return message;
+  return;
 
 };
 
