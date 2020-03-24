@@ -35,7 +35,7 @@
 #include <map>
 #include <set>
 #include <sdl/syncstorage.hpp>
-
+#include <mdclog/mdclog.h>
 
 using namespace std;
 using Namespace = std::string;
@@ -46,16 +46,12 @@ using Keys = std::set<Key>;
 
 class XappSDL{
 private:
-	std::unique_ptr<shareddatalayer::SyncStorage> sdl;
-	Namespace ns;
-public:
+	std::string sdl_namespace;
 
-	XappSDL(std::string s) {
-		Namespace temp(s);
-		ns = temp;
-		sdl = (shareddatalayer::SyncStorage::create());
-	};
-	void insert_data();
+public:
+	XappSDL(std::string ns) { sdl_namespace=ns; }
+	void get_data(shareddatalayer::SyncStorage *);
+	bool set_data(shareddatalayer::SyncStorage *);
 };
 
 #endif /* SRC_XAPP_UTILS_XAPP_SDL_HPP_ */

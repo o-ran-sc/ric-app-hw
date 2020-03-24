@@ -32,16 +32,6 @@ Xapp::Xapp(XappSettings &config, XappRmr &rmr){
 	return;
 }
 
-
-Xapp::Xapp(XappSettings &config, XappRmr &rmr, XappSDL &sdl){
-	rmr_ref = &rmr;
-	config_ref = &config;
-	sdl_ref = &sdl;
-	//sdl_ref.insert_data();
-	xapp_mutex = NULL;
-
-	return;
-}
 Xapp::~Xapp(void){
 
 	//Joining the threads
@@ -50,25 +40,36 @@ Xapp::~Xapp(void){
 		if(xapp_rcv_thread[i].joinable())
 			xapp_rcv_thread[i].join();
 	}
+
 	delete xapp_mutex;
+
 };
+
+void Xapp::init() {
+
+	//get rnib information
+	get_rnib_gnblist();
+
+
+}
 void Xapp::startup() {
 	//send subscriptions and read A1 policies.
 	startup_subscribe_requests();
-	startup_get_policies();
+	//startup_get_policies();
 	return;
 }
 
-void Xapp::start_xapp_receiver(){
+void Xapp::start_xapp_receiver(XappMsgHandler& mp_handler){
 	//start a receiver thread. Can be multiple receiver threads for more than 1 listening port.
 
 	xapp_mutex = new std::mutex();
 
-	std::vector<std::unique_ptr <XappMsgHandler>> message_procs;
 	mdclog_write(MDCLOG_INFO,"Receiver Thread file= %s, line=%d",__FILE__,__LINE__);
-	std::unique_ptr<XappMsgHandler> mp_handler = std::make_unique<XappMsgHandler>();
+	//std::unique_ptr<XappMsgHandler> mp_handler = std::make_unique<XappMsgHandler>();
+	//auto mp_handler = _callbacks[0];
 	std::lock_guard<std::mutex> guard(*xapp_mutex);
-	std::thread th_recv([&](){ rmr_ref->xapp_rmr_receive(std::move(*mp_handler.get()), rmr_ref);});
+	std::thread th_recv([&](){ rmr_ref->xapp_rmr_receive(std::move(mp_handler), rmr_ref);});
+
 	xapp_rcv_thread.push_back(std::move(th_recv));
 
 
@@ -88,11 +89,7 @@ void Xapp::startup_subscribe_requests(void ){
    size_t data_size = ASN_BUFF_MAX_SIZE;
    unsigned char	data[data_size];
 
-   std::vector<std::string> gNodeBs;
-   gNodeBs.push_back("GNB1001"); //this line should come from RNIB
-
-
-   for(auto &it: gNodeBs){
+   for(auto &it: rnib_gnblist){
      int attempt = 0;
  	 XappMsgHandler msg;
 
@@ -129,25 +126,37 @@ void Xapp::startup_get_policies(void){
   free(message);
 
 }
-void Xapp::sdl_data(void) {
-	sdl_ref->insert_data();
-}
-/*void Xapp::rnib_data(void) {
 
-	   printf("Using rnibreader lib from C:\n");
-	   open();
+void Xapp::set_rnib_gnblist(void) {
+
+	   openSdl();
 	   void *result = getListGnbIds();
 	   if(result == NULL){
-
-	        printf("ERROR: no data from getListGnbIds\n");
+		    mdclog_write(MDCLOG_ERR, "ERROR: no data from getListGnbIds\n");
 	        return;
 	    }
-	    printf("getListGnbIds response: %s\n", (char *)result);
-	    close();
+
+	    mdclog_write(MDCLOG_INFO, "GNB List in R-NIB %s\n", (char*)result);
+
+	    Document doc;
+	    doc.Parse((char*)result);
+	    assert(doc.HasMember("gnb_list"));
+	    const Value& gnblist = doc["gnb_list"];
+	    assert(gnblist.IsArray());
+	    for (SizeType i = 0; i < gnblist.Size(); i++) // Uses SizeType instead of size_t
+	    {
+	    	assert(gnblist[i].IsObject());
+	    	const Value& gnbobj = gnblist[i];
+	    	assert(gnbobj.HasMember("inventory_name"));
+	    	assert(gnbobj["inventory_name"].IsString());
+	    	rnib_gnblist.push_back(gnbobj["inventory_name"].GetString());
+
+	    }
+	    closeSdl();
 	    free(result);
 	    return;
 
-}*/
+}
 
 
 

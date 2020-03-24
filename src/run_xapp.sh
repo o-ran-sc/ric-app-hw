@@ -1,7 +1,7 @@
 #! /bin/bash
+
 /*
 ==================================================================================
-
         Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 ==================================================================================
- */
+*/
 export RMR_SEED_RT="routes.txt"
 export RMR_RTG_SVC="9999"
 export XAPP_NAME="HELLOWORLD_XAPP"
