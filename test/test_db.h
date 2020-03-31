@@ -16,30 +16,53 @@
    limitations under the License.
 ==================================================================================
 /*
- * hw_unit_tests.cc
+ * test_rnib.h
  *
- *  Created on: Mar, 2020
+ *  Created on: Mar 23, 2020
  *  Author: Shraboni Jana
  */
 
+#ifndef TEST_TEST_DB_H_
+#define TEST_TEST_DB_H_
+
 #include<iostream>
-#include<stdlib.h>
 #include<gtest/gtest.h>
-
-#include "test_db.h"
-//#include "test_rmr.h"
-#include "test_hc.h"
-
-#define HC_MSG_SIZE 512
+#include "xapp.hpp"
 
 using namespace std;
 
-
-int main(int argc, char* argv[])
+TEST(Xapp, getGNBlist)
 {
-	char rmr_seed[80]="RMR_SEED_RT=../src/routes.txt";
-	putenv(rmr_seed);
+	XappSettings config;
+	XappRmr rmr("7001");
 
-	testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
+	Xapp hw_xapp(std::ref(config),rmr);
+	hw_xapp.set_rnib_gnblist();
+
+	auto gnblist = hw_xapp.get_rnib_gnblist();
+	int sz = gnblist.size();
+	EXPECT_GE(sz,0);
+	std::cout << "************gnb ids retrieved using R-NIB**************" << std::endl;
+	for(int i = 0; i<sz; i++){
+		std::cout << gnblist[i] << std::endl;
+	}
+
 }
+
+TEST(Xapp, SDLData){
+
+	//Xapp's SDL namespace.
+    std::string nmspace = "hw-xapp";
+	XappSDL xappsdl(nmspace);
+
+	std::unique_ptr<shareddatalayer::SyncStorage> sdl(shareddatalayer::SyncStorage::create());
+	bool res = xappsdl.set_data(sdl.get());
+	ASSERT_TRUE(res);
+
+	xappsdl.get_data(sdl.get());
+
+}
+
+
+
+#endif /* TEST_TEST_DB_H_ */
