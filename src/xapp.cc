@@ -20,7 +20,6 @@
  * xapp.cc
  *
  *  Created on: Mar, 2020
- *  Author: Shraboni Jana
  */
 
 #include "xapp.hpp"
@@ -36,14 +35,26 @@ Xapp::~Xapp(void){
 
 	//Joining the threads
 	int threadcnt = xapp_rcv_thread.size();
-	for(int i=0; i<threadcnt; i++){
-		if(xapp_rcv_thread[i].joinable())
-			xapp_rcv_thread[i].join();
+		for(int i=0; i<threadcnt; i++){
+			if(xapp_rcv_thread[i].joinable())
+				xapp_rcv_thread[i].join();
 	}
+	xapp_rcv_thread.clear();
 
-	delete xapp_mutex;
-
+	if(xapp_mutex!=NULL){
+		xapp_mutex->~mutex();
+		delete xapp_mutex;
+	}
 };
+
+//stop the xapp.
+void Xapp::stop(void){
+  // Get the mutex lock
+	std::lock_guard<std::mutex> guard(*xapp_mutex);
+	rmr_ref->set_listen(false);
+	rmr_ref->~XappRmr();
+
+}
 
 void Xapp::init() {
 
@@ -61,7 +72,7 @@ void Xapp::startup() {
 
 void Xapp::start_xapp_receiver(XappMsgHandler& mp_handler){
 	//start a receiver thread. Can be multiple receiver threads for more than 1 listening port.
-
+	rmr_ref->set_listen(true);
 	xapp_mutex = new std::mutex();
 
 	mdclog_write(MDCLOG_INFO,"Receiver Thread file= %s, line=%d",__FILE__,__LINE__);
@@ -88,13 +99,13 @@ void Xapp::shutdown(){
 void Xapp::startup_subscribe_requests(void ){
    size_t data_size = ASN_BUFF_MAX_SIZE;
    unsigned char	data[data_size];
-
+   std::string xapp_id = config_ref->operator [](XappSettings::SettingName::XAPP_ID);
    for(auto &it: rnib_gnblist){
      int attempt = 0;
- 	 XappMsgHandler msg;
+ 	 XappMsgHandler msg = XappMsgHandler(xapp_id);
 
- /*	 bool res_encode = msg.encode_subscription_request(data, &data_size);
- 	 if(!res_encode) exit(0);*/
+ 	 //bool res_encode = msg.encode_subscription_request(data, &data_size);
+ 	 //if(!res_encode) exit(0);
  	char *strMsg = "HelloWorld\0";
  	strncpy((char *)data,strMsg,strlen(strMsg));
  	data_size = sizeof(data);
@@ -106,6 +117,8 @@ void Xapp::startup_subscribe_requests(void ){
 
      		 auto transmitter = std::bind(&XappRmr::xapp_rmr_send,rmr_ref, &rmr_header, (void*)data);
      		 transmitter(); //this will go to subscription manager.
+    	 	 //rmr_ref->xapp_rmr_call(&rmr_header,(char*)strMsg);
+
      		 break;
      }
    }
@@ -141,8 +154,11 @@ void Xapp::set_rnib_gnblist(void) {
 	    Document doc;
 	    doc.Parse((char*)result);
 	    assert(doc.HasMember("gnb_list"));
+
+
 	    const Value& gnblist = doc["gnb_list"];
 	    assert(gnblist.IsArray());
+
 	    for (SizeType i = 0; i < gnblist.Size(); i++) // Uses SizeType instead of size_t
 	    {
 	    	assert(gnblist[i].IsObject());
@@ -153,7 +169,8 @@ void Xapp::set_rnib_gnblist(void) {
 
 	    }
 	    closeSdl();
-	    free(result);
+
+	    //delete result;
 	    return;
 
 }

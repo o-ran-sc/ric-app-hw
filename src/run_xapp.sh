@@ -1,5 +1,6 @@
 #! /bin/bash
 
+export RMR_SEED_RT="routes.txt"
 export RMR_RTG_SVC="9999"
 export XAPP_NAME="HELLOWORLD_XAPP"
 export HW_PORTS="4560"
