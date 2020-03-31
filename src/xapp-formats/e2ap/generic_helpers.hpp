@@ -1,5 +1,5 @@
+/*
 ==================================================================================
-
         Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,21 +14,36 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 ==================================================================================
-
-This repository consists of HelloWorld Xapp developed in C++. Its envisioned to be the most simplest example Xapp. 
-It is required to have following features
-
-1) E2 Subscription Handling
-2) A1 Policy Handling
-3) SDL Access
-4) Health Check
-5)...
+*/
 
 
+#pragma once
+#ifndef GENERIC_HELPERS
+#define GENERIC_HELPERS
 
+#include <cstddef>
 
-Steps for installation/running HWXapp.
+/* Utilities */
 
-$ source ./run_xapp.sh
-$ make
-$ ./hw_xapp_main
+class octet_helper {
+
+public:
+  octet_helper(void):_ref(NULL), _size(0){};
+  octet_helper(const void *ref, int size):_ref(ref), _size(size){};
+  void set_ref(const void *ref){
+    _ref = ref;
+  }
+  
+  void set_size(size_t size){
+    _size = size;
+  }
+  
+  const void * get_ref(void){return _ref ; };
+  size_t get_size(void) const {return _size ; } ;
+
+private:
+  const void *_ref;
+  size_t _size;
+};
+    
+#endif

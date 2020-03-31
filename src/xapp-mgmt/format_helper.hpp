@@ -1,3 +1,4 @@
+/*
 ==================================================================================
 
         Copyright (c) 2018-2019 AT&T Intellectual Property.
@@ -14,21 +15,35 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 ==================================================================================
+*/
+/*
+ * a1_policy.hpp
+ *
+ *  Created on: Mar, 2020
+ *  Author: Shraboni Jana
+ */
 
-This repository consists of HelloWorld Xapp developed in C++. Its envisioned to be the most simplest example Xapp. 
-It is required to have following features
+#ifndef SRC_XAPP_MGMT_A1MSG_A1_POLICY_HELPER_HPP_
+#define SRC_XAPP_MGMT_A1MSG_A1_POLICY_HELPER_HPP_
 
-1) E2 Subscription Handling
-2) A1 Policy Handling
-3) SDL Access
-4) Health Check
-5)...
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/schema.h>
+
+using namespace rapidjson;
+
+typedef struct a1_policy_helper a1_policy_helper;
+
+struct a1_policy_helper{
+
+	std::string operation;
+	std::string policy_type_id;
+	std::string policy_instance_id;
+	std::string handler_id;
+	std::string status;
+
+};
 
 
-
-
-Steps for installation/running HWXapp.
-
-$ source ./run_xapp.sh
-$ make
-$ ./hw_xapp_main
+#endif /* SRC_XAPP_FORMATS_A1MSG_A1_POLICY_HELPER_HPP_ */
