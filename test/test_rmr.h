@@ -32,88 +32,44 @@
 
 using namespace std;
 
-TEST(XappRmr, RMRSender){
+TEST(RMR, Sender){
 
-	int total_num_msgs = 10;
-	int num_attempts = 5;
+	int total_num_msgs = 2;
+	int num_attempts = 10;
 
 	std::unique_ptr<XappRmr> rmr;
 	rmr = std::make_unique<XappRmr>("4560",num_attempts);
 	rmr->xapp_rmr_init();
+	rmr->set_listen(false);
 
 	xapp_rmr_header hdr;
  	hdr.message_type = RIC_HEALTH_CHECK_REQ;
-    char *strMsg = (char*)malloc(HC_MSG_SIZE);
 
     for(int i = 0; i < total_num_msgs; i++){
-       snprintf(strMsg,HC_MSG_SIZE, "HelloWorld: RMR Health Check %d", i);
-       clock_gettime(CLOCK_REALTIME, &(hdr.ts));
-       hdr.payload_length = strlen(strMsg);
+    	std::string temp="HelloWorld: RMR Health Check"+ std::to_string(i);
+    	int n = temp.length();
+    	char strMsg[n+1];
+        std::strcpy(strMsg,temp.c_str());
 
-       bool res = rmr->xapp_rmr_send(&hdr,(void*)strMsg);
-       ASSERT_TRUE(res);
+        clock_gettime(CLOCK_REALTIME, &(hdr.ts));
+        hdr.payload_length = n+1;
 
-       usleep(10);
+        bool res = rmr->xapp_rmr_send(&hdr,(void*)strMsg);
+        ASSERT_TRUE(res);
+        usleep(1);
      }
-    delete strMsg;
-
+    ASSERT_TRUE(true);
 }
- TEST(XappRmr, RMRReceiver){
+ TEST(RMR, Receiver){
 	 //initialize rmr
-	 std::unique_ptr<XappRmr> rmr;
-	 rmr = std::make_unique<XappRmr>("5551");
+	 std::unique_ptr<XappMsgHandler> mp_handler = std::make_unique<XappMsgHandler>("HW-Xapp-id");
+	 XappRmr *rmr = new XappRmr("4560");
 	 rmr->xapp_rmr_init();
-
-	 XappSettings config;
-
-	 std::unique_ptr<Xapp> hw_xapp = std::make_unique<Xapp>(std::ref(config),std::ref(*rmr));
-
-	 std::unique_ptr<XappMsgHandler> mp_handler = std::make_unique<XappMsgHandler>();
-
-	 rmr->set_listen(true);
-	 hw_xapp->start_xapp_receiver(std::ref(*mp_handler));
-	 sleep(2);
-	 rmr->~XappRmr();
-
+	 sleep(10);
+	 rmr->set_listen(false);
+	 rmr->xapp_rmr_receive(std::move(*mp_handler), rmr);
 	 ASSERT_TRUE(true);
  };
-
- TEST(XappRmr, HC_ReturnToSender){
-
-	 int total_num_msgs = 2;
-	 int num_attempts = 10;
-
-	 std::unique_ptr<XappRmr> rmr;
-	 rmr = std::make_unique<XappRmr>("4560",num_attempts);
-	 rmr->xapp_rmr_init();
-
-	 XappSettings config;
-
-	 std::unique_ptr<Xapp> hw_xapp = std::make_unique<Xapp>(std::ref(config),std::ref(*rmr));
-
-	 std::unique_ptr<XappMsgHandler> mp_handler = std::make_unique<XappMsgHandler>();
-
-	 rmr->set_listen(true);
-	 hw_xapp->start_xapp_receiver(std::ref(*mp_handler));
-	 sleep(5);
-
-	 xapp_rmr_header hdr;
-	 hdr.message_type = RIC_HEALTH_CHECK_REQ;
-	 char strMsg[HC_MSG_SIZE];
-
-	 for(int i = 0; i < total_num_msgs; i++){
-		 snprintf(strMsg,HC_MSG_SIZE, "HelloWorld: RMR Health Check %d", i);
-		 clock_gettime(CLOCK_REALTIME, &(hdr.ts));
-		 hdr.payload_length = strlen(strMsg);
-
-		 bool res = rmr->xapp_rmr_send(&hdr,(void*)strMsg);
-		 usleep(10);
-	 }
-
-
- };
-
-
 
 
 #endif /* TEST_TEST_RMR_H_ */

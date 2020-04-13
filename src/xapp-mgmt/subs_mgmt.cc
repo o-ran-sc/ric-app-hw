@@ -40,7 +40,6 @@ void SubscriptionHandler::clear(void){
   {
     std::lock_guard<std::mutex> lock(*(_data_lock).get());
     requests_table.clear();
-    subscription_responses.clear();
   }
   
 };
@@ -48,11 +47,6 @@ void SubscriptionHandler::clear(void){
 size_t SubscriptionHandler::num_pending(void) const {
   return requests_table.size();
 }
-
-size_t SubscriptionHandler::num_complete(void) const {
-  return subscription_responses.size();
-}
-
 
 void SubscriptionHandler::set_timeout(unsigned int timeout_seconds){
   _time_out = std::chrono::seconds(timeout_seconds);
@@ -102,44 +96,11 @@ bool SubscriptionHandler::delete_request_entry(subscription_identifier id){
   return false;
 };
   
-bool SubscriptionHandler::add_subscription_entry(subscription_identifier id, subscription_response_helper &he){
 
-  auto search = subscription_responses.find(id);
-  if (search == subscription_responses.end()){
-    subscription_responses[id] = he;
-    return true;
-  }
-
-  return false;
-}
-
-
-bool SubscriptionHandler::delete_subscription_entry(subscription_identifier id){
-
-  auto search = subscription_responses.find(id);
-  if(search == subscription_responses.end()){
-    return false;
-  }
-  else{
-    subscription_responses.erase(search);
-    return true;
-  }
-  
-}
-
-subscription_response_helper *  const SubscriptionHandler::get_subscription(subscription_identifier id){
-  auto search = subscription_responses.find(id);
-  if(search == subscription_responses.end()){
-    return NULL;
-  }
-  else{
-    return &(subscription_responses[id]);
-  }
-};
 
 
 // Handles responses from RMR
-void SubscriptionHandler::Response(int message_type, unsigned char *payload, int payload_length, const char * node_id){
+/*void SubscriptionHandler::Response(int message_type, unsigned char *transaction_id, const char * node_id){
 
   bool res;
   std::string node(node_id);
@@ -323,7 +284,7 @@ void SubscriptionHandler::Response(int message_type, unsigned char *payload, int
   }
   
 }
-
+*/
 
 int const SubscriptionHandler::get_request_status(subscription_identifier id){
   auto search = requests_table.find(id);
@@ -334,13 +295,7 @@ int const SubscriptionHandler::get_request_status(subscription_identifier id){
   return search->second;
 }
 				   
- bool SubscriptionHandler::is_subscription_entry(subscription_identifier id){
-  auto search = subscription_responses.find(id);
-  if (search != subscription_responses.end())
-    return true;
-  else
-    return false;
-}
+
 
 bool SubscriptionHandler::is_request_entry(subscription_identifier id){
   auto search = requests_table.find(id);
@@ -351,8 +306,3 @@ bool SubscriptionHandler::is_request_entry(subscription_identifier id){
 }
 
 
-void SubscriptionHandler::get_subscription_keys(std::vector<subscription_identifier> & key_list){
-  for(auto & e: subscription_responses){
-    key_list.push_back(e.first);
-  }
-}

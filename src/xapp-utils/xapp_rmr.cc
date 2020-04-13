@@ -33,7 +33,6 @@ XappRmr::XappRmr(std::string port, int rmrattempts){
 };
 
 XappRmr::~XappRmr(void){
-
 	// free memory
 	if(_xapp_received_buff)
 		rmr_free_msg(_xapp_received_buff);
@@ -44,6 +43,7 @@ XappRmr::~XappRmr(void){
 	if (_xapp_rmr_ctx){
 		rmr_close(_xapp_rmr_ctx);
 	}
+
 };
 
 //Get RMR Context.
@@ -65,24 +65,19 @@ void XappRmr::xapp_rmr_init(){
 	return;
 
 }
-//RMR Returning to the sender.
-bool XappRmr::xapp_rmr_rts()
-{
-	mdclog_write(MDCLOG_INFO,"RMR Return to sender, file= %s, line=%d",__FILE__,__LINE__);
-	if ( _xapp_rmr_ctx == NULL){
-			mdclog_write(MDCLOG_ERR,"Error Initializing RMR, file= %s, line=%d",__FILE__,__LINE__);
-	}
-	while( ! rmr_ready(_xapp_rmr_ctx) ) {
-			mdclog_write(MDCLOG_INFO,">>> waiting for RMR, file= %s, line=%d",__FILE__,__LINE__);
-			sleep(1);
-	}
-	rmr_rts_msg(_xapp_rmr_ctx, _xapp_received_buff );
-	sleep(1);
-	return true;
-}
+
 
 //RMR Send with payload and header.
 bool XappRmr::xapp_rmr_send(xapp_rmr_header *hdr, void *payload){
+
+	// Get the thread id
+	std::thread::id my_id = std::this_thread::get_id();
+	std::stringstream thread_id;
+	std::stringstream ss;
+
+	thread_id << my_id;
+	mdclog_write(MDCLOG_INFO, "Sending thread %s",  thread_id.str().c_str());
+
 
 	int rmr_attempts = _nattempts;
 
@@ -114,7 +109,9 @@ bool XappRmr::xapp_rmr_send(xapp_rmr_header *hdr, void *payload){
 		else
 		{
 			mdclog_write(MDCLOG_INFO,"Need to retry RMR: state=%d, attempt=%d, file=%s, line=%d",_xapp_send_buff->state, rmr_attempts,__FILE__,__LINE__);
-			rmr_attempts--;
+			if(_xapp_send_buff->state == RMR_ERR_RETRY){
+				usleep(1);			}
+				rmr_attempts--;
 		}
 		sleep(1);
 	}

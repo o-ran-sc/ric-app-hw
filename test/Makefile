@@ -7,14 +7,14 @@ UTILSRC=../src/xapp-utils
 MGMTSRC:=../src/xapp-mgmt
 
 ASNSRC:=../asn1c_defs
-E2APSRC:=../src/xapp-asn/e2ap
-E2SMSRC:=../src/xapp-asn/e2sm
+E2APSRC:=../src/xapp-formats/e2ap
+E2SMSRC:=../src/xapp-formats/e2sm
 
 ####### Logging library and flags
 CLOGFLAGS:= `pkg-config mdclog --cflags`
 LOG_LIBS:= `pkg-config mdclog --libs`
 CURL_LIBS:= `pkg-config libcurl --libs`
-RNIB_LIBS:= -pthread /usr/local/lib/rnibreader.a
+RNIB_LIBS:= -pthread /usr/local/lib/rnibreader_old.a
 GTEST_LIBS:= -lgtest -lgtest_main
 ######## Keep include dirs separate so we have transparency
 
@@ -32,7 +32,7 @@ E2SMFLAGS = -I$(E2SMSRC)
 
 ########libs
 
-LIBS= -lsdl -lrmr_nng  -lnng -lpthread -lm $(LOG_LIBS) $(CURL_LIBS) $(RNIB_LIBS) $(GTEST_LIBS)
+LIBS= -lsdl -lrmr_si -lpthread -lm $(LOG_LIBS) $(CURL_LIBS) $(RNIB_LIBS) $(GTEST_LIBS)
 COV_FLAGS= -fprofile-arcs -ftest-coverage
 
 #######
@@ -76,7 +76,7 @@ print-%  : ; @echo $* = $($*)
 hw_unit_tests: $(OBJ)
 	$(CXX) -o $@  $(OBJ) $(LIBS) $(RNIBFLAGS) $(CPPFLAGS) $(CLOGFLAGS)
 
-install: test_rnib
+install: hw_unit_tests
 	install  -D hw_unit_tests  /usr/local/bin/hw_unit_tests
 
 clean:

@@ -231,50 +231,121 @@ bool XappMsgHandler::decode_subscription_delete_response_failure(unsigned char* 
 
 }
 
-//For processing received messages.
+bool  XappMsgHandler::a1_policy_handler(char * message, int *message_len, a1_policy_helper &helper){
+
+  rapidjson::Document doc;
+  if (doc.Parse(message).HasParseError()){
+    mdclog_write(MDCLOG_ERR, "Error: %s, %d :: Could not decode A1 JSON message %s\n", __FILE__, __LINE__, message);
+    return false;
+  }
+
+  //Extract Operation
+  rapidjson::Pointer temp1("/operation");
+    rapidjson::Value * ref1 = temp1.Get(doc);
+    if (ref1 == NULL){
+      mdclog_write(MDCLOG_ERR, "Error : %s, %d:: Could not extract policy type id from %s\n", __FILE__, __LINE__, message);
+      return false;
+    }
+
+   helper.operation = ref1->GetString();
+
+  // Extract policy id type
+  rapidjson::Pointer temp2("/policy_type_id");
+  rapidjson::Value * ref2 = temp2.Get(doc);
+  if (ref2 == NULL){
+    mdclog_write(MDCLOG_ERR, "Error : %s, %d:: Could not extract policy type id from %s\n", __FILE__, __LINE__, message);
+    return false;
+  }
+  helper.policy_type_id = ref2->GetString();
+
+  // Extract policy instance id
+    rapidjson::Pointer temp("/policy_instance_id");
+    rapidjson::Value * ref = temp.Get(doc);
+    if (ref == NULL){
+      mdclog_write(MDCLOG_ERR, "Error : %s, %d:: Could not extract policy type id from %s\n", __FILE__, __LINE__, message);
+      return false;
+    }
+    helper.policy_instance_id = ref->GetString();
+
+    if (helper.policy_type_id == "1" && helper.operation == "CREATE"){
+    	helper.status = "OK";
+    	Document::AllocatorType& alloc = doc.GetAllocator();
+
+    	Value handler_id;
+    	handler_id.SetString(helper.handler_id.c_str(), helper.handler_id.length(), alloc);
+
+    	Value status;
+    	status.SetString(helper.status.c_str(), helper.status.length(), alloc);
+
+
+    	doc.AddMember("handler_id", handler_id, alloc);
+    	doc.AddMember("status",status, alloc);
+    	doc.RemoveMember("operation");
+    	StringBuffer buffer;
+    	Writer<StringBuffer> writer(buffer);
+    	doc.Accept(writer);
+    	strncpy(message,buffer.GetString(), buffer.GetLength());
+    	*message_len = buffer.GetLength();
+    	return true;
+    }
+    return false;
+ }
+
+
+//For processing received messages.XappMsgHandler should mention if resend is required or not.
 void XappMsgHandler::operator()(rmr_mbuf_t *message, bool *resend){
 
-  if (message->len > MAX_RMR_RECV_SIZE){
-    mdclog_write(MDCLOG_ERR, "Error : %s, %d, RMR message larger than %d. Ignoring ...", __FILE__, __LINE__, MAX_RMR_RECV_SIZE);
-    return;
-  }
+	if (message->len > MAX_RMR_RECV_SIZE){
+		mdclog_write(MDCLOG_ERR, "Error : %s, %d, RMR message larger than %d. Ignoring ...", __FILE__, __LINE__, MAX_RMR_RECV_SIZE);
+		return;
+	}
+	a1_policy_helper helper;
+	bool res=false;
+	switch(message->mtype){
+	//need to fix the health check.
+	case (RIC_HEALTH_CHECK_REQ):
+				message->mtype = RIC_HEALTH_CHECK_RESP;        // if we're here we are running and all is ok
+				message->sub_id = -1;
+				strncpy( (char*)message->payload, "HELLOWORLD OK\n", rmr_payload_size( message) );
+				*resend = true;
+	break;
 
-  switch(message->mtype){
-  	  //need to fix the health check.
-  	  case (RIC_HEALTH_CHECK_REQ):
-		message->mtype = RIC_HEALTH_CHECK_RESP;        // if we're here we are running and all is ok
-  	    message->sub_id = -1;
-  	  	strncpy( (char*)message->payload, "HELLOWORLD OK\n", rmr_payload_size( message) );
-  	    *resend = true;
-  	  break;
+	case (RIC_SUB_RESP):
+				//Received Subscription Response Message
+				decode_subscription_response(message->payload,message->len);
+	break;
 
-  	  case (RIC_SUB_RESP):
-		//Received Subscription Response Message
-		decode_subscription_response(message->payload,message->len);
-	  break;
+	case (RIC_SUB_DEL_RESP):
+				decode_subscription_delete_response(message->payload,message->len);
+	break;
 
-  	  case (RIC_SUB_DEL_RESP):
-		decode_subscription_delete_response(message->payload,message->len);
-  	  break;
+	case (RIC_SUB_FAILURE):
+				decode_subscription_response_failure(message->payload, message->len);
+	break;
 
-  	  case (RIC_SUB_FAILURE):
-		decode_subscription_response_failure(message->payload, message->len);
-      break;
+	case (RIC_SUB_DEL_FAILURE):
+				decode_subscription_delete_response_failure(message->payload,message->len);
+	break;
 
-  	  case (RIC_SUB_DEL_FAILURE):
-		decode_subscription_delete_response_failure(message->payload,message->len);
-  	  break;
-  	  //  case A1_POLICY_REQ:
-  	 // break;
+	case A1_POLICY_REQ:
 
+		helper.handler_id = xapp_id;
+		res = a1_policy_handler((char*)message->payload, &message->len, helper);
+		if(res){
+			message->mtype = A1_POLICY_RESP;        // if we're here we are running and all is ok
+			message->sub_id = -1;
+			*resend = true;
+		}
+		break;
 
-  default:
-	*resend = false;
-    mdclog_write(MDCLOG_ERR, "Error :: Unknown message type %d received from RMR", message->mtype);
+	default:
+		{
+			*resend = false;
+			mdclog_write(MDCLOG_ERR, "Error :: Unknown message type %d received from RMR", message->mtype);
+		}
+	}
 
-  }
-
-  return;
+	return;
 
 };
 

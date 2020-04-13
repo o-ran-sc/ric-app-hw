@@ -23,3 +23,12 @@ It is required to have following features
 3) SDL Access
 4) Health Check
 5)...
+
+
+
+
+Steps for installation/running HWXapp.
+
+$ source ./run_xapp.sh
+$ make
+$ ./hw_xapp_main

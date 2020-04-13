@@ -8,14 +8,15 @@
        "protPort": "tcp:4560",
        "maxSize": 2072,
        "numWorkers": 1,
-       "txMessages": ["RIC_SUB_REQ", "RIC_SUB_DEL_REQ", "RIC_CONTROL_REQ", "A1_POLICY_RESP", "A1_POLICY_QUERY"],
-       "rxMessages": ["RIC_SUB_RESP", "RIC_SUB_FAILURE", "RIC_SUB_DEL_RESP", "RIC_SUB_DEL_FAILURE", "RIC_INDICATION", "RIC_CONTROL_ACK", "RIC_CONTROL_FAILURE", "A1_POLICY_REQ"],
-	"file_path":"/tmp/routeinfo/routes.txt",
-	"contents": "newrt|start\nrte|0|localhost:4560\nrte|2|localhost:38000\nrte|10002|localhost:4560\nrte|10005|localhost:4560\nrte|10003|localhost:38000\nrte|12010|localhost:38000\nrte|12020|localhost:38000\nrte|12011|localhost:4560\nrte|12012|localhost:4560\nrte|12021|localhost:4560\nrte|12022|localhost:4560\nrte|20000|localhost:4560\nrte|12040|localhost:38000\nrte|20001|localhost:4566\nrte|20011|localhost:4560\nrte|20012|localhost:4560\nnewrt|end"
+       "txMessages": ["RIC_SUB_REQ", "RIC_SUB_DEL_REQ", "RIC_CONTROL_REQ", "A1_POLICY_RESP", "A1_POLICY_QUERY","RIC_HEALTH_CHECK_RESP"],
+       "rxMessages": ["RIC_SUB_RESP", "RIC_SUB_FAILURE", "RIC_SUB_DEL_RESP", "RIC_SUB_DEL_FAILURE", "RIC_INDICATION", "RIC_CONTROL_ACK", "RIC_CONTROL_FAILURE","RIC_HEALTH_CHECK_REQ", "A1_POLICY_REQ"],
+       "policies": ["1","00000"],
+       "file_path":"/tmp/routeinfo/routes.txt",
+	"contents": "newrt|start\nrte|0|127.0.0.1:4560\nrte|100|127.0.0.1:4560\nrte|2|127.0.0.1:38000\nrte|10002|127.0.0.1:4560\nrte|10005|127.0.0.1:4560\nrte|10003|127.0.0.1:38000\nrte|12010|127.0.0.1:38000\nrte|12020|127.0.0.1:38000\nrte|12011|127.0.0.1:4560\nrte|12012|127.0.0.1:4560\nrte|12021|127.0.0.1:4560\nrte|12022|127.0.0.1:4560\nrte|20000|127.0.0.1:4560\nrte|12040|127.0.0.1:38000\nrte|20001|127.0.0.1:4566\nrte|20010|127.0.0.1:4560\nrte|20012|127.0.0.1:4560\nnewrt|end"
     },
     
     "envs":{
-	"RMR_SEED_RT":"../src/routes.txt",
+	"RMR_SEED_RT":"/tmp/routeinfo/routes.txt",
 	"RMR_RTG_SVC":"9999",
 	"DBAAS_SERVICE_HOST":"127.0.0.1",
 	"DBAAS_SERVICE_PORT":"6379",

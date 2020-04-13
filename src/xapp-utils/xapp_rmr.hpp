@@ -77,7 +77,6 @@ public:
 	template <class MessageProcessor>
 	void xapp_rmr_receive(MessageProcessor&&, XappRmr *parent);
 	bool xapp_rmr_send(xapp_rmr_header*, void*);
-	bool xapp_rmr_rts();
 
 	void set_listen(bool);
 	bool get_listen(void);
@@ -112,7 +111,7 @@ void XappRmr::xapp_rmr_receive(MsgHandler&& msgproc, XappRmr *parent){
 	this->_xapp_received_buff = rmr_alloc_msg(rmr_context, RMR_DEF_SIZE);
 	assert(this->_xapp_received_buff != NULL);
 
-	mdclog_write(MDCLOG_INFO, "Starting thread %s",  thread_id.str().c_str());
+	mdclog_write(MDCLOG_INFO, "Starting receiver thread %s",  thread_id.str().c_str());
 
 	while(parent->get_listen()) {
 		mdclog_write(MDCLOG_INFO, "Listening at Thread: %s",  thread_id.str().c_str());
@@ -132,6 +131,8 @@ void XappRmr::xapp_rmr_receive(MsgHandler&& msgproc, XappRmr *parent){
 			//in case message handler returns true, need to resend the message.
 			msgproc(this->_xapp_received_buff, resend);
 			if(*resend){
+				//mdclog_write(MDCLOG_INFO,"RMR Return to Sender Message of Type: %d",this->_xapp_received_buff->mtype);
+				//mdclog_write(MDCLOG_INFO,"RMR Return to Sender Message: %s",(char*)this->_xapp_received_buff->payload);
 				rmr_rts_msg(rmr_context, this->_xapp_received_buff );
 				sleep(1);
 				*resend = false;

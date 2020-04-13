@@ -15,42 +15,35 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 ==================================================================================
+*/
 /*
- * test_rnib.h
+ * a1_policy.hpp
  *
- *  Created on: Mar 23, 2020
+ *  Created on: Mar, 2020
  *  Author: Shraboni Jana
  */
 
-#ifndef TEST_TEST_RNIB_H_
-#define TEST_TEST_RNIB_H_
+#ifndef SRC_XAPP_MGMT_A1MSG_A1_POLICY_HELPER_HPP_
+#define SRC_XAPP_MGMT_A1MSG_A1_POLICY_HELPER_HPP_
 
-#include<iostream>
-#include<gtest/gtest.h>
-#include "xapp.hpp"
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/schema.h>
 
-using namespace std;
+using namespace rapidjson;
 
-TEST(Xapp, getGNBlist)
-{
-	XappSettings config;
-	XappRmr rmr("4560");
+typedef struct a1_policy_helper a1_policy_helper;
 
-	Xapp hw_xapp(std::ref(config),std::ref(rmr));
-	hw_xapp.set_rnib_gnblist();
+struct a1_policy_helper{
 
-	auto gnblist = hw_xapp.get_rnib_gnblist();
-	int sz = gnblist.size();
-	EXPECT_GE(sz,0);
-	std::cout << "************gnb ids retrieved using R-NIB**************" << std::endl;
-	for(int i = 0; i<sz; i++){
-		std::cout << gnblist[i] << std::endl;
-	}
+	std::string operation;
+	std::string policy_type_id;
+	std::string policy_instance_id;
+	std::string handler_id;
+	std::string status;
 
-}
+};
 
 
-
-
-
-#endif /* TEST_TEST_RNIB_H_ */
+#endif /* SRC_XAPP_FORMATS_A1MSG_A1_POLICY_HELPER_HPP_ */

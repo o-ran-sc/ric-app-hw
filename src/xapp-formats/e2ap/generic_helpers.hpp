@@ -1,6 +1,5 @@
 /*
 ==================================================================================
-
         Copyright (c) 2018-2019 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,34 +14,36 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 ==================================================================================
-/*
- * test_sdl.h
- *
- *  Created on: Mar, 2020
- *   Author: Shraboni Jana
- */
-
-#ifndef TEST_TEST_SDL_H_
-#define TEST_TEST_SDL_H_
-#include<iostream>
-#include<gtest/gtest.h>
-#include "xapp_sdl.hpp"
-
-using namespace std;
-
-TEST(Xapp, SDLData){
-
-	//Xapp's SDL namespace.
-    std::string nmspace = "hw-xapp";
-	XappSDL xappsdl(nmspace);
-
-	std::unique_ptr<shareddatalayer::SyncStorage> sdl(shareddatalayer::SyncStorage::create());
-	bool res = xappsdl.set_data(sdl.get());
-	ASSERT_TRUE(res);
-
-	xappsdl.get_data(sdl.get());
-
-}
+*/
 
 
-#endif /* TEST_TEST_SDL_H_ */
+#pragma once
+#ifndef GENERIC_HELPERS
+#define GENERIC_HELPERS
+
+#include <cstddef>
+
+/* Utilities */
+
+class octet_helper {
+
+public:
+  octet_helper(void):_ref(NULL), _size(0){};
+  octet_helper(const void *ref, int size):_ref(ref), _size(size){};
+  void set_ref(const void *ref){
+    _ref = ref;
+  }
+  
+  void set_size(size_t size){
+    _size = size;
+  }
+  
+  const void * get_ref(void){return _ref ; };
+  size_t get_size(void) const {return _size ; } ;
+
+private:
+  const void *_ref;
+  size_t _size;
+};
+    
+#endif

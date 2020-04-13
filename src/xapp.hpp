@@ -42,7 +42,7 @@
 #include "subs_mgmt.hpp"
 #include "xapp_config.hpp"
 extern "C" {
-#include "rnib/rnibreader.h"
+#include "rnib/rnibreader_old.h"
 }
 using namespace std;
 using namespace std::placeholders;
@@ -55,7 +55,7 @@ public:
 
   Xapp(XappSettings &, XappRmr &);
   ~Xapp(void);
-
+  void stop(void);
   void startup();
   void shutdown(void);
   void init(void);

@@ -2,6 +2,7 @@ newrt|start
 rte|0|localhost:4560
 rte|2|localhost:38000
 rte|100|localhost:4560
+rte|20010|localhost:4560
 rte|10002|localhost:4560
 rte|10005|localhost:4560
 rte|10003|localhost:38000
@@ -14,6 +15,5 @@ rte|12022|localhost:4560
 rte|20000|localhost:4560
 rte|12040|localhost:38000
 rte|20001|localhost:4566
-rte|20011|localhost:4560
 rte|20012|localhost:4560
 newrt|end

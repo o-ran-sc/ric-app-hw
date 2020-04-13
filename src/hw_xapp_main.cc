@@ -61,35 +61,16 @@ int main(int argc, char *argv[]){
 
 
 	std::unique_ptr<Xapp> hw_xapp = std::make_unique<Xapp>(std::ref(config),std::ref(*rmr));
+	//hw_xapp->startup();
 
-	//register MsgHandler plugin for a received rmr_buffer
-	 std::unique_ptr<XappMsgHandler> mp_handler = std::make_unique<XappMsgHandler>();
-	 hw_xapp->register_handler(std::bind(&XappMsgHandler::operator (),mp_handler.get(),std::placeholders::_1,std::placeholders::_2));
-
-	 rmr->set_listen(true);
-	 hw_xapp->start_xapp_receiver(std::ref(*mp_handler));
-
-	 sleep(5);
-
+	std::unique_ptr<XappMsgHandler> mp_handler = std::make_unique<XappMsgHandler>(config[XappSettings::SettingName::XAPP_ID]);
+	 //hw_xapp->register_handler(std::bind(&XappMsgHandler::operator (),mp_handler.get(),std::placeholders::_1,std::placeholders::_2));
+	hw_xapp->start_xapp_receiver(std::ref(*mp_handler));
 
 	//Delete all subscriptions if any based on Xapp Mode.
 	//xapp->shutdown();
 
- 	xapp_rmr_header hdr;
- 	hdr.message_type = RIC_HEALTH_CHECK_REQ;
-
- 	char *strMsg = "HelloWorld: RMR Health Check\0";
-
-       clock_gettime(CLOCK_REALTIME, &(hdr.ts));
-       hdr.payload_length = strlen(strMsg);
-
-       bool res = rmr->xapp_rmr_send(&hdr,(void*)strMsg);
-
-       if (!res){
-    	   std::cout << "Xapp RMR Send Failure";
-       }
-       usleep(10);
-	 while(1){
+ 	while(1){
 	 			sleep(1);
 	 		 }
 
