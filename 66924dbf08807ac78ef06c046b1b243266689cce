@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fd345a7d_37b74ecd",
+        "filename": "Dockerfile",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-04-13T17:32:02Z",
+      "side": 1,
+      "message": "Someone will complain later if there is no license file in files that comments can be added.",
+      "revId": "66924dbf08807ac78ef06c046b1b243266689cce",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "af686d7e_b49480a9",
+        "filename": "Dockerfile-Unit-Tests",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-04-13T17:32:02Z",
+      "side": 1,
+      "message": "License here too",
+      "revId": "66924dbf08807ac78ef06c046b1b243266689cce",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
