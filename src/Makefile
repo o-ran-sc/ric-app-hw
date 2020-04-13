@@ -32,7 +32,7 @@ E2SMFLAGS = -I$(E2SMSRC)
 
 ########libs
 
-LIBS= -lsdl -lrmr_nng  -lnng -lpthread -lm $(LOG_LIBS) $(CURL_LIBS) $(RNIB_LIBS)
+LIBS= -lsdl -lrmr_si  -lpthread -lm $(LOG_LIBS) $(CURL_LIBS) $(RNIB_LIBS)
 COV_FLAGS= -fprofile-arcs -ftest-coverage
 
 #######
