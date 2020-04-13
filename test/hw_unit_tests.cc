@@ -37,7 +37,8 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	char rmr_seed[80]="RMR_SEED_RT=../src/routes.txt";
+//	char rmr_seed[80]="RMR_SEED_RT=../src/routes.txt";
+	char rmr_seed[80]="/tmp/routeinfo/routes.txt";
 	putenv(rmr_seed);
 
 	testing::InitGoogleTest(&argc, argv);

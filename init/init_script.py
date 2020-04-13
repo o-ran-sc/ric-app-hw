@@ -133,14 +133,15 @@ xapp_port = 0;
 ParseSection["rmr"] = getRMRTable;
 ParseSection["envs"] = getEnvs;
 
-default_routing_file = "../src/routes.txt";
+default_routing_file = "/tmp/routeinfo/routes.txt";
 
 
 #================================================================
 if __name__ == "__main__":
 
     import subprocess;
-    cmd = ["../src/hw_xapp_main"];
+#    cmd = ["../src/hw_xapp_main"];
+    cmd = ["/usr/local/bin/hw_xapp_main"];
     if xapp_port > 0:
         cmd.append("-p");
         cmd.append(xapp_port);

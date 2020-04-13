@@ -157,6 +157,9 @@ void Xapp::set_rnib_gnblist(void) {
 
 
 	    const Value& gnblist = doc["gnb_list"];
+	    if (gnblist.IsNull())
+	    return;
+
 	    assert(gnblist.IsArray());
 
 	    for (SizeType i = 0; i < gnblist.Size(); i++) // Uses SizeType instead of size_t

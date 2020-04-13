@@ -32,7 +32,7 @@ E2SMFLAGS = -I$(E2SMSRC)
 
 ########libs
 
-LIBS= -lsdl -lrmr_nng  -lnng -lpthread -lm $(LOG_LIBS) $(CURL_LIBS) $(RNIB_LIBS) $(GTEST_LIBS)
+LIBS= -lsdl -lrmr_si -lpthread -lm $(LOG_LIBS) $(CURL_LIBS) $(RNIB_LIBS) $(GTEST_LIBS)
 COV_FLAGS= -fprofile-arcs -ftest-coverage
 
 #######
@@ -76,7 +76,7 @@ print-%  : ; @echo $* = $($*)
 hw_unit_tests: $(OBJ)
 	$(CXX) -o $@  $(OBJ) $(LIBS) $(RNIBFLAGS) $(CPPFLAGS) $(CLOGFLAGS)
 
-install: test_rnib
+install: hw_unit_tests
 	install  -D hw_unit_tests  /usr/local/bin/hw_unit_tests
 
 clean:
