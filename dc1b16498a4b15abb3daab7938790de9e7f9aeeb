@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1465c35d_3e3eee95",
+        "filename": "src/Makefile",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-04T14:54:02Z",
+      "side": 1,
+      "message": "Can this be revised to use a CmakeList.txt file instead, to generate the Makefile?  CMake seems to be the modern (if frustrating, complex, confounding) build tool.",
+      "revId": "dc1b16498a4b15abb3daab7938790de9e7f9aeeb",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
