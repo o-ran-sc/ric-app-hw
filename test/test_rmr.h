@@ -28,8 +28,6 @@
 #include<gtest/gtest.h>
 #include "xapp.hpp"
 
-#define HC_MSG_SIZE 512
-
 using namespace std;
 
 TEST(RMR, Sender){
@@ -39,13 +37,12 @@ TEST(RMR, Sender){
 
 	std::unique_ptr<XappRmr> rmr;
 	rmr = std::make_unique<XappRmr>("4560",num_attempts);
-	rmr->xapp_rmr_init();
-	rmr->set_listen(false);
+	rmr->xapp_rmr_init(false);
 
 	xapp_rmr_header hdr;
  	hdr.message_type = RIC_HEALTH_CHECK_REQ;
 
-    for(int i = 0; i < total_num_msgs; i++){
+ 	for(int i = 0; i < total_num_msgs; i++){
     	std::string temp="HelloWorld: RMR Health Check"+ std::to_string(i);
     	int n = temp.length();
     	char strMsg[n+1];
@@ -64,12 +61,47 @@ TEST(RMR, Sender){
 	 //initialize rmr
 	 std::unique_ptr<XappMsgHandler> mp_handler = std::make_unique<XappMsgHandler>("HW-Xapp-id");
 	 XappRmr *rmr = new XappRmr("4560");
-	 rmr->xapp_rmr_init();
+	 rmr->xapp_rmr_init(false);
 	 sleep(10);
-	 rmr->set_listen(false);
+
 	 rmr->xapp_rmr_receive(std::move(*mp_handler), rmr);
 	 ASSERT_TRUE(true);
  };
 
+TEST(RMR, SendReceiveWithMEID) {
+    XappSettings config;
+	int total_num_msgs = 2;
+	int num_attempts = 10;
 
+	std::unique_ptr<XappRmr> rmr;
+	rmr = std::make_unique<XappRmr>("4560",num_attempts);
+	rmr->xapp_rmr_init(true);
+
+	std::unique_ptr<Xapp> hw_xapp = std::make_unique<Xapp>(config,std::ref(*rmr));
+	std::unique_ptr<XappMsgHandler> mp_handler = std::make_unique<XappMsgHandler>("HW-Xapp_ID");
+	hw_xapp->start_xapp_receiver(std::ref(*mp_handler));
+
+	xapp_rmr_header hdr;
+	//can be any message type. using as an example
+	hdr.message_type = RIC_SUB_RESP;
+	memset(hdr.meid,0,32);
+	string meid = "NYC123";
+	strcpy(reinterpret_cast<char*>(hdr.meid), meid.c_str());
+
+ 	for(int i = 0; i < total_num_msgs; i++){
+    	std::string temp="HelloWorld: RMR Health Check"+ std::to_string(i);
+    	int n = temp.length();
+    	char strMsg[n+1];
+        std::strcpy(strMsg,temp.c_str());
+
+        clock_gettime(CLOCK_REALTIME, &(hdr.ts));
+        hdr.payload_length = n+1;
+
+        bool res = rmr->xapp_rmr_send(&hdr,(void*)strMsg);
+        ASSERT_TRUE(res);
+        usleep(1);
+     }
+ 	  sleep(1);
+      hw_xapp->stop();
+}
 #endif /* TEST_TEST_RMR_H_ */
