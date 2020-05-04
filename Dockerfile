@@ -1,20 +1,3 @@
-#/*
-#==================================================================================
-#        Copyright (c) 2018-2019 AT&T Intellectual Property.
-#
-#   Licensed under the Apache License, Version 2.0 (the "License");
-#   you may not use this file except in compliance with the License.
-#   You may obtain a copy of the License at
-#
-#       http://www.apache.org/licenses/LICENSE-2.0
-#
-#   Unless required by applicable law or agreed to in writing, software
-#   distributed under the License is distributed on an "AS IS" BASIS,
-#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#   See the License for the specific language governing permissions and
-#   limitations under the License.
-#==================================================================================
-#*/
 ARG SCHEMA_PATH=schemas
 ARG STAGE_DIR=/tmp/helloworld-xapp
 
@@ -62,13 +45,18 @@ RUN wget -nv --content-disposition https://packagecloud.io/o-ran-sc/staging/pack
 RUN dpkg -i rmr_${RMR_VER}_amd64.deb
 RUN dpkg -i rmr-dev_${RMR_VER}_amd64.deb
 
+#Install RNIB libraries
+ARG RNIB_VER=1.0.0
+RUN wget -nv --content-disposition https://packagecloud.io/o-ran-sc/release/packages/debian/stretch/rnib_${RNIB_VER}_all.deb/download.deb
+RUN dpkg -i rnib_${RNIB_VER}_all.deb
+
 ## Install SDL Libraries
 WORKDIR ${STAGE_DIR}
 RUN apt-get install -y cpputest
 RUN apt-get remove -y libboost-all-dev
 RUN apt-get install -y  libboost-all-dev
 RUN apt-get install -y libhiredis-dev
-RUN apt-get install -y valgrind
+#RUN apt-get install -y valgrind
 
 RUN git config --global http.proxy http://one.proxy.att.com:8080
 RUN git clone https://gerrit.o-ran-sc.org/r/ric-plt/dbaas
@@ -76,7 +64,6 @@ RUN cd dbaas/redismodule && \
     ./autogen.sh && \
     ./configure && \
     make all && \
-#    make test && \
     make install
 
 WORKDIR ${STAGE_DIR}
@@ -85,14 +72,12 @@ RUN cd sdl && \
     ./autogen.sh && \
     ./configure && \
     make all && \
-#    make test && \
     make install
 
 RUN git config --global --unset http.proxy
 
 WORKDIR ${STAGE_DIR}
 ## Install rapidjson
-    #git checkout tags/v1.1.0 && \
 
 RUN git clone https://github.com/Tencent/rapidjson && \
     cd rapidjson && \
@@ -103,25 +88,22 @@ RUN git clone https://github.com/Tencent/rapidjson && \
     cd ${STAGE_DIR} && \
     rm -rf rapidjson
 
-### Copy RNIB library and include rnib.
-RUN mkdir /usr/local/include/rnib
-
 ##-----------------------------------
 # Now install the program
 #------------------------------------
 COPY ./ ${STAGE_DIR}
 RUN ls -al
-COPY ${STAGE}/rnib/*.h /usr/local/include/rnib/
-COPY ${STAGE}/rnibreader_old.a /usr/local/lib/
+
 
 RUN export CPATH=$CPATH:/usr/local/include && \ 
     cd src && \
+#    source ./xapp_env.sh \
     make clean && \
     make install 
 
 COPY ${SCHEMA_PATH}/* /etc/xapp/ 
 COPY init/init_script.py /etc/xapp/init_script.py
-
+COPY init/routes.txt  /etc/xapp/routes.txt
 #---------------------------------------------
 # #Build the final version
 
@@ -132,7 +114,6 @@ ARG STAGE_DIR
 
 ## copy just the needed libraries install it into the final image
 COPY --from=ricbuild ${STAGE_DIR}/*.deb /tmp/
-#COPY --from=ricbuild /usr/local/libexec/. /usr/local/libexec/.
 COPY --from=ricbuild /usr/local/lib/librmr_si* /usr/local/lib/
 COPY --from=ricbuild /usr/local/lib/libsdl* /usr/local/lib/
 COPY --from=ricbuild /usr/local/libexec/redismodule/libredis* /usr/local/libexec/redismodule/
@@ -143,8 +124,8 @@ RUN apt-get update && \
     apt-get clean
 COPY --from=ricbuild /etc/xapp/* /etc/xapp/
 COPY --from=ricbuild /usr/local/bin/hw_xapp_main /usr/local/bin/hw_xapp_main
-COPY --from=ricbuild ${STAGE_DIR}/rnib/*.h /usr/local/include/rnib/
-COPY --from=ricbuild ${STAGE_DIR}/rnibreader_old.a /usr/local/lib/
+COPY --from=ricbuild /usr/local/include/rnib/*.h /usr/local/include/rnib/
+COPY --from=ricbuild /usr/local/include/rnib/rnibreader.a /usr/local/include/rnib/
 
 ##COPY --from=ricbuild /usr/local/bin/e2e-test-client /usr/local/bin/e2e-test-client
 ##COPY --from=ricbuild /usr/local/bin/mock-e2term-server /usr/local/bin/mock-e2term-server
@@ -159,13 +140,9 @@ RUN sysctl -w net.ipv6.conf.lo.disable_ipv6=1
 ##ENV  PYTHONHOME=/opt/python3 \
 ##     PYTHONPATH=/opt/python3 \
 ENV  RMR_RTG_SVC="9999" \
+     RMR_SEED_RT="/etc/xapp/routes.txt" \
      LD_LIBRARY_PATH="/usr/local/lib:/usr/local/libexec" \
-     NAME=ADM_CTRL_XAPP \
-     PORT=tcp:4560 \
-     THREADS=1\
      VERBOSE=0 \
-     MESSAGE_TYPE=10002 \
-     RATE=1 \
      CONFIG_FILE=/opt/ric/config/config-file.json
      
       
