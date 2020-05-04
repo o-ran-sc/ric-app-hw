@@ -1,0 +1,211 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e23c75aa_433f46f8",
+        "filename": "Dockerfile",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-04T16:25:00Z",
+      "side": 1,
+      "message": "Please stop using the Ubuntu16 builder, instead use the ubuntu18 version.  Really, 16.04 is 4 years old, Ubuntu20.04 is out now, it\u0027s time to upgrade.",
+      "range": {
+        "startLine": 5,
+        "startChar": 31,
+        "endLine": 5,
+        "endChar": 50
+      },
+      "revId": "9f107942702550e0470f33ac04a58ef59a9b7239",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5c444fda_022a206b",
+        "filename": "Dockerfile",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-04T16:25:00Z",
+      "side": 1,
+      "message": "Very old, please upgrade to 4.0.2",
+      "range": {
+        "startLine": 42,
+        "startChar": 12,
+        "endLine": 42,
+        "endChar": 17
+      },
+      "revId": "9f107942702550e0470f33ac04a58ef59a9b7239",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf5ec535_806a82a6",
+        "filename": "Dockerfile",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-04T16:25:00Z",
+      "side": 1,
+      "message": "Use the releases area, not staging",
+      "range": {
+        "startLine": 43,
+        "startChar": 68,
+        "endLine": 43,
+        "endChar": 75
+      },
+      "revId": "9f107942702550e0470f33ac04a58ef59a9b7239",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "41abff5b_c90785c2",
+        "filename": "Dockerfile-Unit-Tests",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-04T16:25:00Z",
+      "side": 1,
+      "message": "Please upgrade to ubuntu18 base bldr- image",
+      "range": {
+        "startLine": 5,
+        "startChar": 31,
+        "endLine": 5,
+        "endChar": 49
+      },
+      "revId": "9f107942702550e0470f33ac04a58ef59a9b7239",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "86ffb8e8_2990e45e",
+        "filename": "Dockerfile-Unit-Tests",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-04T16:25:00Z",
+      "side": 1,
+      "message": "what in heavens is this?  Why is an AT\u0026T-specific URL being configured in an open-source Dockerfile?  If you need a proxy, configure that in the Docker daemon, NOT in the Dockerfile.",
+      "range": {
+        "startLine": 70,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 1
+      },
+      "revId": "9f107942702550e0470f33ac04a58ef59a9b7239",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b0681c4d_af2763d4",
+        "filename": "Dockerfile-Unit-Tests",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-04T16:25:00Z",
+      "side": 1,
+      "message": "remove, don\u0027t comment out",
+      "range": {
+        "startLine": 117,
+        "startChar": 0,
+        "endLine": 117,
+        "endChar": 1
+      },
+      "revId": "9f107942702550e0470f33ac04a58ef59a9b7239",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7fb2da60_9d6c113a",
+        "filename": "Dockerfile-Unit-Tests",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-04T16:25:00Z",
+      "side": 1,
+      "message": "Since you seem to require python for testing, start from a python image; don\u0027t install it each time you build.",
+      "range": {
+        "startLine": 119,
+        "startChar": 0,
+        "endLine": 119,
+        "endChar": 1
+      },
+      "revId": "9f107942702550e0470f33ac04a58ef59a9b7239",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2a254df5_8910efa1",
+        "filename": "Dockerfile-Unit-Tests",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-04T16:25:00Z",
+      "side": 1,
+      "message": "Remove, don\u0027t comment out",
+      "range": {
+        "startLine": 140,
+        "startChar": 0,
+        "endLine": 144,
+        "endChar": 1
+      },
+      "revId": "9f107942702550e0470f33ac04a58ef59a9b7239",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4c60543a_b30a4027",
+        "filename": "Dockerfile-Unit-Tests",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1000014
+      },
+      "writtenOn": "2020-05-04T16:25:00Z",
+      "side": 1,
+      "message": "This is kind of a strange script, it launches the xApp then monitors it the whole time, definitely not just \"init\".  What\u0027s the purpose here, is it only for test?",
+      "range": {
+        "startLine": 159,
+        "startChar": 11,
+        "endLine": 159,
+        "endChar": 36
+      },
+      "revId": "9f107942702550e0470f33ac04a58ef59a9b7239",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
