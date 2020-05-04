@@ -1,39 +1,83 @@
 {
-    "service_ports":{
-	"xapp_port":4560,
-	"rmr_port":4561
+    "config-file.json": {
+        "xapp_name": "hwxapp",
+        "version": "1.0.0",
+        "containers": [
+            {
+                "name": "hwxapp",
+                "image": {
+                    "registry": "nexus3.o-ran-sc.org:10002",
+                    "name": "o-ran-sc/ric-app-hw",
+                    "tag": "0.0.1"
+                },
+                "command": "python3 init.py config-file.json"
+            }
+        ],
+        "livenessProbe": {
+            "exec": {
+                "command": [
+                    "/usr/local/bin/health_ck"
+                ]
+            },
+            "initialDelaySeconds": 5,
+            "periodSeconds": 15
+        },
+        "messaging": {
+            "ports": [
+                {
+                    "name": "rmr-data",
+                    "container": "hwxapp",
+                    "port": 4560,
+                    "rxMessages": [ 
+						"RIC_SUB_RESP", 
+						"RIC_SUB_FAILURE", 
+						"RIC_SUB_DEL_RESP", "RIC_SUB_DEL_FAILURE", "RIC_INDICATION", "RIC_CONTROL_ACK", "RIC_CONTROL_FAILURE", "A1_POLICY_REQ", "RIC_HEALTH_CHECK_REQ" 
+                    ],
+                    "txMessages": [ "RIC_SUB_REQ", "RIC_SUB_DEL_REQ", "RIC_CONTROL_REQ", "A1_POLICY_RESP", "A1_POLICY_QUERY", "RIC_HEALTH_CHECK_RESP" ],
+                    "policies": [1],
+                    "description": "rmr receive data port for HWxapp"
+                },
+                {
+                    "name": "rmr-route",
+                    "container": "hwxapp",
+                    "port": 4561,
+                    "description": "rmr route port for hwxapp"
+                }
+            ]
+        },
+        "controls": {
+            "ves_collector_address": "xapp-sandbox2.research.att.com:8888"
+        },
+        "rmr": {
+            "protPort": "tcp:4560",
+            "maxSize": 2072,
+            "numWorkers": 1,
+            "txMessages": [
+                "RIC_SUB_REQ", "RIC_SUB_DEL_REQ", "RIC_CONTROL_REQ", "A1_POLICY_RESP", "A1_POLICY_QUERY", "RIC_HEALTH_CHECK_RESP"
+            ],
+            "rxMessages": [
+                "RIC_SUB_RESP", 
+				"RIC_SUB_FAILURE", 
+				"RIC_SUB_DEL_RESP", "RIC_SUB_DEL_FAILURE", "RIC_INDICATION", "RIC_CONTROL_ACK", "RIC_CONTROL_FAILURE", "A1_POLICY_REQ", "RIC_HEALTH_CHECK_REQ"              
+            ]
+        }
     },
-
-    "rmr":{
-       "protPort": "tcp:4560",
-       "maxSize": 2072,
-       "numWorkers": 1,
-       "txMessages": ["RIC_SUB_REQ", "RIC_SUB_DEL_REQ", "RIC_CONTROL_REQ", "A1_POLICY_RESP", "A1_POLICY_QUERY","RIC_HEALTH_CHECK_RESP"],
-       "rxMessages": ["RIC_SUB_RESP", "RIC_SUB_FAILURE", "RIC_SUB_DEL_RESP", "RIC_SUB_DEL_FAILURE", "RIC_INDICATION", "RIC_CONTROL_ACK", "RIC_CONTROL_FAILURE","RIC_HEALTH_CHECK_REQ", "A1_POLICY_REQ"],
-       "policies": ["1","00000"],
-       "file_path":"/tmp/routeinfo/routes.txt",
-	"contents": "newrt|start\nrte|0|127.0.0.1:4560\nrte|100|127.0.0.1:4560\nrte|2|127.0.0.1:38000\nrte|10002|127.0.0.1:4560\nrte|10005|127.0.0.1:4560\nrte|10003|127.0.0.1:38000\nrte|12010|127.0.0.1:38000\nrte|12020|127.0.0.1:38000\nrte|12011|127.0.0.1:4560\nrte|12012|127.0.0.1:4560\nrte|12021|127.0.0.1:4560\nrte|12022|127.0.0.1:4560\nrte|20000|127.0.0.1:4560\nrte|12040|127.0.0.1:38000\nrte|20001|127.0.0.1:4566\nrte|20010|127.0.0.1:4560\nrte|20012|127.0.0.1:4560\nnewrt|end"
-    },
-    
-    "envs":{
-	"RMR_SEED_RT":"/tmp/routeinfo/routes.txt",
-	"RMR_RTG_SVC":"9999",
-	"DBAAS_SERVICE_HOST":"127.0.0.1",
-	"DBAAS_SERVICE_PORT":"6379",
-	"XAPP_NAME":"HELLOWORLD_XAPP",
-	"HW_PORTS":"4560",
-	"MSG_MAX_BUFFER":"2048",
-	"THREADS":"1",
-	"VERBOSE":"0",
-	"CONFIG_FILE":"config-file.json",
-	"GNODEB":"NYC123",
-	"XAPP_ID":"3489-er492k-92389",
-	"A1_SCHEMA_FILE":"schemas/hwxapp-policy.json",
-	"VES_SCHEMA_FILE":"schemas/hwxapp-ves.json",
-	"VES_COLLECTOR_URL":"127.0.0.1:6350",
-	"VES_MEASUREMENT_INTERVAL":"10",
-	"LOG_LEVEL":"MDCLOG_ERR",
-	"OPERATING_MODE":"REPORT"
-
+  "controls-schema.json": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": "#/controls",
+        "type": "object",
+        "title": "Controls Section Schema",
+        "required": [],
+        "properties": {
+            "ves_collector_address": {
+                "$id": "#/controls/ves_collector_address",
+                "type": "string",
+                "title": "ves_collector_address",
+                "default": "localhost:8080",
+                "examples": [
+                    "localhost:8080"
+                ]
+            }
+        }
     }
 }

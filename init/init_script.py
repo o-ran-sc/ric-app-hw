@@ -42,98 +42,42 @@ def signal_handler(signum, frame):
         
 
 def parseConfigJson(config):
-    for key in config:
-        print("Processing ", key);
-        if key in ParseSection:
-            result = ParseSection[key](config);
-            if result == False:
-                return False;
+    for k1 in config.keys():
+        for k2 in config[k1].keys():
+            #print(k2);
+            if k2 in ParseSection:
+                result = ParseSection[k2](config[k1]);
+                if result == False:
+                    return False;
+
 
         
-def getRMRTable(config):
-    myKey= "rmr";
-    if myKey not in config:
+def getMessagingInfo(config):
+     if 'messaging' in config.keys() and 'ports' in config['messaging'].keys():
+        port_list = config['messaging']['ports']
+        for portdesc in port_list :
+            if 'port' in portdesc.keys() and 'name' in portdesc.keys() and portdesc['name'] == 'rmr-data':
+                lport = portdesc['port']
+                # Set the environment variable
+                os.environ["HW_PORT"] = str(lport)
+                return True;
+     if lport == 0:
+         print("Error! No valid listening port");
+         return False;
+
+def getXappName(config):
+    myKey = "xapp_name";
+    if myKey not in config.keys():
         print(("Error ! No information found for {0} in config\n".format(myKey)));
         return False;
-
-    # Get the rmr routing table
-    if "file_path" not in config[myKey]:
-        print(("Warning ! No file path specified to store seed routing table. Choosing default = {1}\n".format(default_routing_file)));
-        route_file = default_routing_file;
-    else:
-        route_file = config[myKey]["file_path"];
-
-    # Get the rmr routing table contents
-    if "contents" not in config[myKey]:
-        print("No contents for routing table found in config");
-        return False;
-    else:
-        route_contents = config[myKey]["contents"];
-        
-    # Get directory : if not exists create it
-    directory = os.path.dirname(route_file);
-    if not os.path.exists(directory):
-        # create directory
-        try:
-            os.mkdir(directory);
-        except OSError as oe:
-            print(("Error making directory {0}. Reason = {1}\n".format(directory, oe)));
-            return False;
-
-    # Write contents to file
-    try:
-        with open(route_file, "w") as f :
-            f.write(config[myKey]["contents"]);
-            f.close();
-    except Exception as e:
-        print(("Error writing contents to file {0}. Reason = {1}\n".format(route_file, e)));
-        return False;
-
-    # Set the environment variable
-    os.environ["RMR_SEED_RT"] = route_file;
-
-def getPort(config):
-    myKey = "service_ports";
-    if myKey not in config:
-        print(("Error ! No information found for {0} in config\n".format(myKey)));
-        return False;
-    port_config = config[myKey];
-    if "xapp_port" in port_config:
-        try:
-            xapp_port = int(port_config["xapp_port"]);
-            if xapp_port < 1024:
-                raise Exception("Port must be > 1024");
-        except Exception as e:
-            print(("Error processing xapp port {0}. Reason = {1}\n".format(port_config["xapp_port"], e)));
-            return False;
-    else:
-        xapp_port = 0;
-        
-
-def getEnvs(config):
-    myKey = "envs";
-    if myKey not in config:
-        print(("Error ! No information found for {0} in config\n".format(myKey)));
-        return False;
-    
-    env_config = config[myKey];
-    
-    for env_key in env_config:
-        os.environ[env_key] = env_config[env_key];
-        print("Set environment variable {0} = {1}\n".format(env_key, os.environ[env_key]));
-
-    return True;
-
-
-# Global variables ...
-xapp_subprocess = None;
-xapp_pid = None;
-ParseSection = {};
-xapp_port = 0;
-ParseSection["rmr"] = getRMRTable;
-ParseSection["envs"] = getEnvs;
+    xapp_name = config[myKey];
+    os.environ["XAPP_NAME"] = xapp_name;
 
 default_routing_file = "/tmp/routeinfo/routes.txt";
+lport = 0;
+ParseSection = {};
+ParseSection["xapp_name"] = getXappName;
+ParseSection["messaging"] = getMessagingInfo;
 
 
 #================================================================
@@ -142,9 +86,6 @@ if __name__ == "__main__":
     import subprocess;
 #    cmd = ["../src/hw_xapp_main"];
     cmd = ["/usr/local/bin/hw_xapp_main"];
-    if xapp_port > 0:
-        cmd.append("-p");
-        cmd.append(xapp_port);
         
     if len(sys.argv) > 1:
         config_file = sys.argv[1];
@@ -163,7 +104,7 @@ if __name__ == "__main__":
              sys.exit(1);
              
     result = parseConfigJson(config);
-
+    time.sleep(10);
     if result == False:
         print("Error parsing json. Not executing xAPP");
         sys.exit(1);
