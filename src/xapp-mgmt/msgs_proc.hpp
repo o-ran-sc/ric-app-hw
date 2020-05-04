@@ -1,4 +1,4 @@
-/*
+ 	 /*
 ==================================================================================
         Copyright (c) 2018-2019 AT&T Intellectual Property.
 
@@ -30,6 +30,7 @@
 #include <rmr/RIC_message_types.h>
 #include <mdclog/mdclog.h>
 
+#include "a1_helper.hpp"
 #include "e2ap_control.hpp"
 #include "e2ap_control_response.hpp"
 #include "e2ap_indication.hpp"
@@ -39,8 +40,8 @@
 #include "subscription_request.hpp"
 #include "subscription_request.hpp"
 #include "subscription_response.hpp"
-#include "e2sm.hpp"
-#include "format_helper.hpp"
+#include "e2sm_subscription.hpp"
+#include "subs_mgmt.hpp"
 
 #define MAX_RMR_RECV_SIZE 2<<15
 
@@ -48,21 +49,22 @@ class XappMsgHandler{
 
 private:
 	std::string xapp_id;
+	SubscriptionHandler *_ref_sub_handler;
 public:
 	//constructor for xapp_id.
-	 XappMsgHandler(std::string xid){xapp_id=xid;};
+	 XappMsgHandler(std::string xid){xapp_id=xid; _ref_sub_handler=NULL;};
+	 XappMsgHandler(std::string xid, SubscriptionHandler &subhandler){xapp_id=xid; _ref_sub_handler=&subhandler;};
+
 	 void operator() (rmr_mbuf_t *, bool*);
 
-	 bool encode_subscription_request(unsigned char*, size_t* );
+	 void register_handler();
 	 bool encode_subscription_delete_request(unsigned char*, size_t* );
 
 	 bool decode_subscription_response(unsigned char*, size_t );
-	 bool decode_subscription_delete_response(unsigned char*, size_t );
-	 bool decode_subscription_response_failure(unsigned char*, size_t );
-	 bool decode_subscription_delete_response_failure(unsigned char*, size_t );
 
 	 bool a1_policy_handler(char *, int* , a1_policy_helper &);
 
+	 void testfunction() {std::cout << "<<<<<<<<<<<<<<<<<<IN TEST FUNCTION<<<<<<<<<<<<<<<" << std::endl;}
 };
 
 
