@@ -51,21 +51,47 @@ int main(int argc, char *argv[]){
 	signal(SIGTERM, signalHandler);
 
 	//getting the listening port and xapp name info
-	std::string  port = config[XappSettings::SettingName::HW_PORTS];
+	std::string  port = config[XappSettings::SettingName::HW_PORT];
 	std::string  name = config[XappSettings::SettingName::XAPP_NAME];
 
 	//initialize rmr
-	std::unique_ptr<XappRmr> rmr;
-	rmr = std::make_unique<XappRmr>(port);
-	rmr->xapp_rmr_init();
+	std::unique_ptr<XappRmr> rmr = std::make_unique<XappRmr>(port);
+	rmr->xapp_rmr_init(true);
 
 
-	std::unique_ptr<Xapp> hw_xapp = std::make_unique<Xapp>(std::ref(config),std::ref(*rmr));
-	//hw_xapp->startup();
+	//Create Subscription Handler if Xapp deals with Subscription.
+	bool sub_required = true;
+	std::unique_ptr<SubscriptionHandler> sub_handler = std::make_unique<SubscriptionHandler>();
 
-	std::unique_ptr<XappMsgHandler> mp_handler = std::make_unique<XappMsgHandler>(config[XappSettings::SettingName::XAPP_ID]);
-	 //hw_xapp->register_handler(std::bind(&XappMsgHandler::operator (),mp_handler.get(),std::placeholders::_1,std::placeholders::_2));
-	hw_xapp->start_xapp_receiver(std::ref(*mp_handler));
+	//create HelloWorld Xapp Instance.
+	std::unique_ptr<Xapp> hw_xapp;
+	if(sub_required)
+		hw_xapp = std::make_unique<Xapp>(std::ref(config),std::ref(*rmr), std::ref(*sub_handler));
+	else
+		hw_xapp = std::make_unique<Xapp>(std::ref(config),std::ref(*rmr));
+
+	mdclog_write(MDCLOG_INFO, "Created Hello World Xapp Instance");
+
+	sleep(1);
+	//Startup E2 subscription and A1 policy
+	hw_xapp->startup();
+
+
+	//start listener threads and register message handlers.
+	int num_threads = std::stoi(config[XappSettings::SettingName::THREADS]);
+	for(int j=0; j < num_threads; j++) {
+		std::unique_ptr<XappMsgHandler> mp_handler;
+		if(sub_required)
+			mp_handler = std::make_unique<XappMsgHandler>(config[XappSettings::SettingName::XAPP_ID], std::ref(*sub_handler));
+		else
+			mp_handler = std::make_unique<XappMsgHandler>(config[XappSettings::SettingName::XAPP_ID]);
+
+		hw_xapp->register_handler(std::ref(*mp_handler));
+	}
+
+	mdclog_write(MDCLOG_INFO, "Starting Listener Threads. Number of Workers = %d", num_threads);
+
+	hw_xapp->Run();
 
 	//Delete all subscriptions if any based on Xapp Mode.
 	//xapp->shutdown();
