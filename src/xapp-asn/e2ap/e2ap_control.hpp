@@ -1,7 +1,7 @@
 /*
 ==================================================================================
 
-        Copyright (c) 2018-2019 AT&T Intellectual Property.
+        Copyright (c) 2019-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@
 #include <errno.h>
 #include <mdclog/mdclog.h>
 #include <sstream>
-#include <E2N_E2AP-PDU.h>
-#include <E2N_InitiatingMessage.h>
-#include <E2N_RICcontrolRequest.h>
-#include <E2N_ProtocolIE-Field.h>
+#include <E2AP-PDU.h>
+#include <InitiatingMessage.h>
+#include <RICcontrolRequest.h>
+#include <ProtocolIE-Field.h>
 #include "e2ap_control_helper.hpp"
 
 #define NUM_CONTROL_REQUEST_IES 6
@@ -47,15 +47,15 @@ public:
   ~ric_control_request(void);
     
   bool encode_e2ap_control_request(unsigned char *, size_t *,  ric_control_helper &);
-  E2N_InitiatingMessage_t * get_message (void) ;
-  bool set_fields(E2N_InitiatingMessage_t *, ric_control_helper &);
-  bool get_fields(E2N_InitiatingMessage_t *, ric_control_helper &);
+  InitiatingMessage_t * get_message (void) ;
+  bool set_fields(InitiatingMessage_t *, ric_control_helper &);
+  bool get_fields(InitiatingMessage_t *, ric_control_helper &);
   std::string get_error(void) const {return error_string ; };
 private:
 
-  E2N_E2AP_PDU_t * e2ap_pdu_obj;
-  E2N_InitiatingMessage_t *initMsg;
-  E2N_RICcontrolRequest_IEs_t *IE_array;
+  E2AP_PDU_t * e2ap_pdu_obj;
+  InitiatingMessage_t *initMsg;
+  RICcontrolRequest_IEs_t *IE_array;
   std::string error_string;
 
   char errbuf[128];

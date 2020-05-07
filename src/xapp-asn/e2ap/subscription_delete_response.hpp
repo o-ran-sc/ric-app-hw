@@ -1,6 +1,6 @@
 /*
 ==================================================================================
-        Copyright (c) 2018-2019 AT&T Intellectual Property.
+        Copyright (c) 2019-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,13 +27,13 @@
 #include <sstream>
 #include <mdclog/mdclog.h>
 #include <asn_application.h>
-#include <E2N_E2AP-PDU.h>
-#include <E2N_SuccessfulOutcome.h>
-#include <E2N_UnsuccessfulOutcome.h>
-#include <E2N_RICsubscriptionDeleteResponse.h>
-#include <E2N_RICsubscriptionDeleteFailure.h>
-#include <E2N_ProtocolIE-Field.h>
-#include <E2N_ProcedureCode.h>
+#include <E2AP-PDU.h>
+#include <SuccessfulOutcome.h>
+#include <UnsuccessfulOutcome.h>
+#include <RICsubscriptionDeleteResponse.h>
+#include <RICsubscriptionDeleteFailure.h>
+#include <ProtocolIE-Field.h>
+#include <ProcedureCode.h>
 #include "response_helper.hpp"
 
 #define NUM_SUBSCRIPTION_DELETE_RESPONSE_IES 2
@@ -46,11 +46,11 @@ public:
   ~subscription_delete_response(void);
     
   bool encode_e2ap_subscription_delete_response(unsigned char *, size_t *,  subscription_response_helper &, bool);
-  bool set_fields(E2N_SuccessfulOutcome_t *, subscription_response_helper &);
-  bool get_fields(E2N_SuccessfulOutcome_t *, subscription_response_helper &);
+  bool set_fields(SuccessfulOutcome_t *, subscription_response_helper &);
+  bool get_fields(SuccessfulOutcome_t *, subscription_response_helper &);
     
-  bool set_fields(E2N_UnsuccessfulOutcome_t *, subscription_response_helper &);
-  bool get_fields(E2N_UnsuccessfulOutcome_t *, subscription_response_helper &);
+  bool set_fields(UnsuccessfulOutcome_t *, subscription_response_helper &);
+  bool get_fields(UnsuccessfulOutcome_t *, subscription_response_helper &);
   
   std::string get_error_string(void) const {
     return error_string;
@@ -58,13 +58,13 @@ public:
     
 private:
 
-  E2N_E2AP_PDU_t * e2ap_pdu_obj;
-  E2N_SuccessfulOutcome_t * successMsg;
-  E2N_UnsuccessfulOutcome_t * unsuccessMsg;
+  E2AP_PDU_t * e2ap_pdu_obj;
+  SuccessfulOutcome_t * successMsg;
+  UnsuccessfulOutcome_t * unsuccessMsg;
     
 
-  E2N_RICsubscriptionDeleteResponse_IEs_t *IE_array;
-  E2N_RICsubscriptionDeleteFailure_IEs_t *IE_Failure_array;
+  RICsubscriptionDeleteResponse_IEs_t *IE_array;
+  RICsubscriptionDeleteFailure_IEs_t *IE_Failure_array;
   
   
   char errbuf[128];

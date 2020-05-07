@@ -1,5 +1,6 @@
 /*
 ==================================================================================
+
         Copyright (c) 2019-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,35 +16,34 @@
    limitations under the License.
 ==================================================================================
 */
+/*
+ * a1_policy.hpp
+ *
+ *  Created on: Mar, 2020
+ *  Author: Shraboni Jana
+ */
 
+#ifndef SRC_XAPP_MGMT_A1MSG_A1_POLICY_HELPER_HPP_
+#define SRC_XAPP_MGMT_A1MSG_A1_POLICY_HELPER_HPP_
 
-#pragma once
-#ifndef GENERIC_HELPERS
-#define GENERIC_HELPERS
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/schema.h>
 
-#include <cstddef>
+using namespace rapidjson;
 
-/* Utilities */
+typedef struct a1_policy_helper a1_policy_helper;
 
-class octet_helper {
+struct a1_policy_helper{
 
-public:
-  octet_helper(void):_ref(NULL), _size(0){};
-  octet_helper(const void *ref, int size):_ref(ref), _size(size){};
-  void set_ref(const void *ref){
-    _ref = ref;
-  }
-  
-  void set_size(size_t size){
-    _size = size;
-  }
-  
-  const void * get_ref(void){return _ref ; };
-  size_t get_size(void) const {return _size ; } ;
+	std::string operation;
+	std::string policy_type_id;
+	std::string policy_instance_id;
+	std::string handler_id;
+	std::string status;
 
-private:
-  const void *_ref;
-  size_t _size;
 };
-    
-#endif
+
+
+#endif /* SRC_XAPP_FORMATS_A1MSG_A1_POLICY_HELPER_HPP_ */

@@ -1,7 +1,7 @@
 /*
 ==================================================================================
 
-        Copyright (c) 2018-2019 AT&T Intellectual Property.
+        Copyright (c) 2019-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
  *//*
  * xapp.hpp
  *
- *  Modified: Mar, 2020 (Shraboni Jana)
+ *  Mar, 2020 (Shraboni Jana)
  *
  */
 
@@ -38,44 +38,46 @@
 #include "xapp_sdl.hpp"
 #include "rapidjson/writer.h"
 #include "rapidjson/document.h"
+#include "rapidjson/error/error.h"
+
 #include "msgs_proc.hpp"
 #include "subs_mgmt.hpp"
 #include "xapp_config.hpp"
 extern "C" {
-#include "rnib/rnibreader_old.h"
+#include "rnib/rnibreader.h"
 }
 using namespace std;
 using namespace std::placeholders;
 using namespace rapidjson;
 
-using callback_type = std::function< void(rmr_mbuf_t*,bool*) > ;
 
 class Xapp{
 public:
 
   Xapp(XappSettings &, XappRmr &);
+  Xapp(XappSettings &, XappRmr &, SubscriptionHandler &);
+
   ~Xapp(void);
+
   void stop(void);
+
   void startup();
   void shutdown(void);
-  void init(void);
+
   void start_xapp_receiver(XappMsgHandler &);
+  void Run();
+
   void sdl_data(void);
 
   Xapp(Xapp const &)=delete;
   Xapp& operator=(Xapp const &) = delete;
 
-  template<typename FunctionObject>
-  void register_handler(FunctionObject fn){
+  void register_handler(XappMsgHandler &fn){
 	  _callbacks.emplace_back(fn);
   }
 
-  void callback_handler(){
-
-  }
-
-  void set_rnib_gnblist(void);
   //getters/setters.
+  void set_rnib_gnblist(void);
   std::vector<std::string> get_rnib_gnblist(){ return rnib_gnblist; }
 
 private:
@@ -86,12 +88,12 @@ private:
 
   XappRmr * rmr_ref;
   XappSettings * config_ref;
+  SubscriptionHandler *subhandler_ref;
 
   std::mutex *xapp_mutex;
   std::vector<std::thread> xapp_rcv_thread;
   std::vector<std::string> rnib_gnblist;
-
-  std::vector<callback_type> _callbacks;
+  std::vector<XappMsgHandler> _callbacks;
 
 };
 

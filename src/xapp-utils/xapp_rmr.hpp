@@ -1,7 +1,7 @@
 /*
 ==================================================================================
 
-        Copyright (c) 2018-2019 AT&T Intellectual Property.
+        Copyright (c) 2019-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -51,9 +51,10 @@ typedef struct{
 	int32_t message_type;
 	int32_t state;
 	int32_t payload_length;
-	unsigned char xid[RMR_MAX_XID]; //space for user transaction id.
-	unsigned char sid[RMR_MAX_SID]; //sender ID for return to sender needs.(ACKS required)
-	unsigned char src[RMR_MAX_SRC]; //name of the sender (source)
+	unsigned char sid[RMR_MAX_SID]; //sender ID for return to sender needs.(ACKS required)[RMR_MAX_SID]
+	unsigned char src[RMR_MAX_SRC]; //name of the sender (source)[RMR_MAX_SRC]
+	unsigned char meid[RMR_MAX_MEID]={};
+
 }  xapp_rmr_header;
 
 
@@ -72,12 +73,16 @@ public:
 
 	XappRmr(std::string, int rmrattempts=10);
 	~XappRmr(void);
-	void xapp_rmr_init(void);
+	void xapp_rmr_init(bool);
 
 	template <class MessageProcessor>
 	void xapp_rmr_receive(MessageProcessor&&, XappRmr *parent);
+
+	template <class MessageProcessor>
+	void xapp_test_receiver(MessageProcessor&&, XappRmr *parent);
 	bool xapp_rmr_send(xapp_rmr_header*, void*);
 
+	bool rmr_header(xapp_rmr_header*);
 	void set_listen(bool);
 	bool get_listen(void);
 	int get_is_ready(void);
@@ -85,6 +90,7 @@ public:
 	void* get_rmr_context(void);
 
 };
+
 
 // main workhorse thread which does the listen->process->respond loop
 template <class MsgHandler>
@@ -117,7 +123,7 @@ void XappRmr::xapp_rmr_receive(MsgHandler&& msgproc, XappRmr *parent){
 		mdclog_write(MDCLOG_INFO, "Listening at Thread: %s",  thread_id.str().c_str());
 
 		this->_xapp_received_buff = rmr_rcv_msg( rmr_context, this->_xapp_received_buff );
-
+		//this->_xapp_received_buff = rmr_call( rmr_context, this->_xapp_received_buff);
 
 		if( this->_xapp_received_buff->mtype < 0 || this->_xapp_received_buff->state != RMR_OK ) {
 			mdclog_write(MDCLOG_ERR, "bad msg:  state=%d  errno=%d, file= %s, line=%d", this->_xapp_received_buff->state, errno, __FILE__,__LINE__ );
@@ -128,8 +134,9 @@ void XappRmr::xapp_rmr_receive(MsgHandler&& msgproc, XappRmr *parent){
 			mdclog_write(MDCLOG_INFO,"RMR Received Message of Type: %d",this->_xapp_received_buff->mtype);
 			mdclog_write(MDCLOG_INFO,"RMR Received Message: %s",(char*)this->_xapp_received_buff->payload);
 
-			//in case message handler returns true, need to resend the message.
+		    //in case message handler returns true, need to resend the message.
 			msgproc(this->_xapp_received_buff, resend);
+
 			if(*resend){
 				//mdclog_write(MDCLOG_INFO,"RMR Return to Sender Message of Type: %d",this->_xapp_received_buff->mtype);
 				//mdclog_write(MDCLOG_INFO,"RMR Return to Sender Message: %s",(char*)this->_xapp_received_buff->payload);

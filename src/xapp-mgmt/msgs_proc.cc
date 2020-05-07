@@ -1,7 +1,7 @@
 /*
 ==================================================================================
 
-        Copyright (c) 2018-2019 AT&T Intellectual Property.
+        Copyright (c) 2019-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -25,69 +25,11 @@
 
 #include "msgs_proc.hpp"
 
-//sending messages are encoded.
-bool XappMsgHandler::encode_subscription_request(unsigned char* buffer, size_t *buf_len)
-{
-	int request_id = 2; // will be over-written by subscription handler
-	int req_seq = 1;
-	int function_id = 0;
-	int action_id = 1;
-	int action_type = 0;
-	int subsequent_action = 0; // continue
-	int time_to_wait = 4; // 10ms
 
-	int message_type = 1;
-	int procedure_code = 27;
-	std::string egnb_id = "Testgnb";
-	std::string plmn_id = "Testplmn";
-
-	unsigned char event_buf[128];
-	size_t event_buf_len = 128;
-	bool res;
-
-
-	e2sm_event_trigger_helper trigger_data;
-	e2sm_event_trigger event_trigger;
-
-	trigger_data.egNB_id = egnb_id;
-	trigger_data.plmn_id = plmn_id;
-	trigger_data.egNB_id_type = 2;
-	trigger_data.interface_direction = 1;
-	trigger_data.procedure_code = procedure_code;
-	trigger_data.message_type = message_type;
-	//======================================================
-
-	// Encode the event trigger definition
-	res = event_trigger.encode_event_trigger(&event_buf[0], &event_buf_len, trigger_data);
-	if (!res){
-		mdclog_write(MDCLOG_ERR, "Error : %s, %d: Could not encode subscription Request. Reason = %s\n", __FILE__, __LINE__, event_trigger.get_error().c_str());
-		return false;
-	}
-	mdclog_write(MDCLOG_INFO, "Encoded event trigger definition into PDU of size %lu bytes\n", event_buf_len);
-
-
-	// create the subscription
-	subscription_helper subscr_req;
-	subscription_request e2ap_sub_req;
-
-	subscr_req.clear();
-	subscr_req.set_request(request_id, req_seq);
-	subscr_req.set_function_id(function_id);
-	subscr_req.add_action(action_id, action_type, "", subsequent_action, time_to_wait);
-
-	subscr_req.set_event_def(&event_buf[0], event_buf_len);
-	// generate the request pdu
-	res = e2ap_sub_req.encode_e2ap_subscription(&buffer[0], buf_len, subscr_req);
-	if(! res){
-		mdclog_write(MDCLOG_ERR, "%s, %d: Error encoding subscription pdu. Reason = ", __FILE__, __LINE__);
-		return false;
-	}
-	return true;
-}
 bool XappMsgHandler::encode_subscription_delete_request(unsigned char* buffer, size_t *buf_len){
 
 	subscription_helper sub_helper;
-	sub_helper.set_request(0, 0); // requirement of subscription manager ... ?
+	sub_helper.set_request(0); // requirement of subscription manager ... ?
 	sub_helper.set_function_id(0);
 
 	subscription_delete e2ap_sub_req_del;
@@ -106,20 +48,21 @@ bool XappMsgHandler::encode_subscription_delete_request(unsigned char* buffer, s
 
 bool XappMsgHandler::decode_subscription_response(unsigned char* data_buf, size_t data_size){
 
+	subscription_helper subhelper;
+	subscription_response subresponse;
 	bool res = true;
-	E2N_E2AP_PDU_t *e2pdu = 0;
+	E2AP_PDU_t *e2pdu = 0;
 
 	asn_dec_rval_t rval;
 
-	ASN_STRUCT_RESET(asn_DEF_E2N_E2AP_PDU, e2pdu);
+	ASN_STRUCT_RESET(asn_DEF_E2AP_PDU, e2pdu);
 
-	rval = asn_decode(0,ATS_ALIGNED_BASIC_PER, &asn_DEF_E2N_E2AP_PDU, (void**)&e2pdu, data_buf, data_size);
+	rval = asn_decode(0,ATS_ALIGNED_BASIC_PER, &asn_DEF_E2AP_PDU, (void**)&e2pdu, data_buf, data_size);
 	switch(rval.code)
 	{
 		case RC_OK:
-			  //Put in Subscription Response Object.
-			   asn_fprint(stdout, &asn_DEF_E2N_E2AP_PDU, e2pdu);
-
+			   //Put in Subscription Response Object.
+			   //asn_fprint(stdout, &asn_DEF_E2AP_PDU, e2pdu);
 			   break;
 		case RC_WMORE:
 				mdclog_write(MDCLOG_ERR, "RC_WMORE");
@@ -132,101 +75,7 @@ bool XappMsgHandler::decode_subscription_response(unsigned char* data_buf, size_
 		default:
 				break;
 	 }
-	ASN_STRUCT_FREE(asn_DEF_E2N_E2AP_PDU, e2pdu);
-	return res;
-
-}
-bool XappMsgHandler::decode_subscription_delete_response(unsigned char* data_buf, size_t data_size){
-
-	bool res = true;
-	E2N_E2AP_PDU_t *e2pdu = 0;
-
-	asn_dec_rval_t rval;
-
-	ASN_STRUCT_RESET(asn_DEF_E2N_E2AP_PDU, e2pdu);
-
-	rval = asn_decode(0,ATS_ALIGNED_BASIC_PER, &asn_DEF_E2N_E2AP_PDU, (void**)&e2pdu, data_buf, data_size);
-	switch(rval.code)
-	{
-		case RC_OK:
-			  //Put in Subscription Delete Response Object.
-			   asn_fprint(stdout, &asn_DEF_E2N_E2AP_PDU, e2pdu);
-			   break;
-		case RC_WMORE:
-				mdclog_write(MDCLOG_ERR, "RC_WMORE");
-				res = false;
-				break;
-		case RC_FAIL:
-				mdclog_write(MDCLOG_ERR, "RC_FAIL");
-				res = false;
-				break;
-		default:
-				break;
-	 }
-	ASN_STRUCT_FREE(asn_DEF_E2N_E2AP_PDU, e2pdu);
-	return res;
-
-}
-bool XappMsgHandler::decode_subscription_response_failure(unsigned char* data_buf, size_t data_size){
-
-	bool res = true;
-	E2N_E2AP_PDU_t *e2pdu = 0;
-
-	asn_dec_rval_t rval;
-
-	ASN_STRUCT_RESET(asn_DEF_E2N_E2AP_PDU, e2pdu);
-
-	rval = asn_decode(0,ATS_ALIGNED_BASIC_PER, &asn_DEF_E2N_E2AP_PDU, (void**)&e2pdu, data_buf, data_size);
-	switch(rval.code)
-	{
-		case RC_OK:
-			  //Extract Subscription Response Failure.
-			   asn_fprint(stdout, &asn_DEF_E2N_E2AP_PDU, e2pdu);
-			   break;
-		case RC_WMORE:
-				mdclog_write(MDCLOG_ERR, "RC_WMORE");
-				res = false;
-				break;
-		case RC_FAIL:
-				mdclog_write(MDCLOG_ERR, "RC_FAIL");
-				res = false;
-				break;
-		default:
-				break;
-	 }
-	ASN_STRUCT_FREE(asn_DEF_E2N_E2AP_PDU, e2pdu);
-	return res;
-
-}
-
-bool XappMsgHandler::decode_subscription_delete_response_failure(unsigned char* data_buf, size_t data_size){
-
-	bool res = true;
-	E2N_E2AP_PDU_t *e2pdu = 0;
-
-	asn_dec_rval_t rval;
-
-	ASN_STRUCT_RESET(asn_DEF_E2N_E2AP_PDU, e2pdu);
-
-	rval = asn_decode(0,ATS_ALIGNED_BASIC_PER, &asn_DEF_E2N_E2AP_PDU, (void**)&e2pdu, data_buf, data_size);
-	switch(rval.code)
-	{
-		case RC_OK:
-			  //Extract Subscription Delete Response Failure.
-			   asn_fprint(stdout, &asn_DEF_E2N_E2AP_PDU, e2pdu);
-				break;
-		case RC_WMORE:
-				mdclog_write(MDCLOG_ERR, "RC_WMORE");
-				res = false;
-				break;
-		case RC_FAIL:
-				mdclog_write(MDCLOG_ERR, "RC_FAIL");
-				res = false;
-				break;
-		default:
-				break;
-	 }
-	ASN_STRUCT_FREE(asn_DEF_E2N_E2AP_PDU, e2pdu);
+	ASN_STRUCT_FREE(asn_DEF_E2AP_PDU, e2pdu);
 	return res;
 
 }
@@ -302,46 +151,42 @@ void XappMsgHandler::operator()(rmr_mbuf_t *message, bool *resend){
 	a1_policy_helper helper;
 	bool res=false;
 	switch(message->mtype){
-	//need to fix the health check.
-	case (RIC_HEALTH_CHECK_REQ):
+		//need to fix the health check.
+		case (RIC_HEALTH_CHECK_REQ):
 				message->mtype = RIC_HEALTH_CHECK_RESP;        // if we're here we are running and all is ok
 				message->sub_id = -1;
 				strncpy( (char*)message->payload, "HELLOWORLD OK\n", rmr_payload_size( message) );
 				*resend = true;
-	break;
+				break;
 
-	case (RIC_SUB_RESP):
-				//Received Subscription Response Message
-				decode_subscription_response(message->payload,message->len);
-	break;
+		case (RIC_SUB_RESP):
+        		mdclog_write(MDCLOG_INFO, "Received subscription message of type = %d", message->mtype);
+				unsigned char *me_id;
+				rmr_get_meid(message, me_id);
+				mdclog_write(MDCLOG_INFO,"RMR Received MEID: %s",me_id);
 
-	case (RIC_SUB_DEL_RESP):
-				decode_subscription_delete_response(message->payload,message->len);
-	break;
-
-	case (RIC_SUB_FAILURE):
-				decode_subscription_response_failure(message->payload, message->len);
-	break;
-
-	case (RIC_SUB_DEL_FAILURE):
-				decode_subscription_delete_response_failure(message->payload,message->len);
-	break;
+				if(_ref_sub_handler !=NULL){
+					_ref_sub_handler->manage_subscription_response(message->mtype, me_id);
+				} else {
+					mdclog_write(MDCLOG_ERR, " Error :: %s, %d : Subscription handler not assigned in message processor !", __FILE__, __LINE__);
+				}
+				*resend = false;
+				break;
 
 	case A1_POLICY_REQ:
-
-		helper.handler_id = xapp_id;
-		res = a1_policy_handler((char*)message->payload, &message->len, helper);
-		if(res){
-			message->mtype = A1_POLICY_RESP;        // if we're here we are running and all is ok
-			message->sub_id = -1;
-			*resend = true;
-		}
-		break;
+			helper.handler_id = xapp_id;
+			res = a1_policy_handler((char*)message->payload, &message->len, helper);
+			if(res){
+				message->mtype = A1_POLICY_RESP;        // if we're here we are running and all is ok
+				message->sub_id = -1;
+				*resend = true;
+			}
+			break;
 
 	default:
 		{
-			*resend = false;
 			mdclog_write(MDCLOG_ERR, "Error :: Unknown message type %d received from RMR", message->mtype);
+			*resend = false;
 		}
 	}
 

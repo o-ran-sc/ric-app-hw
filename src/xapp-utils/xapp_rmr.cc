@@ -1,7 +1,7 @@
 /*
 ==================================================================================
 
-        Copyright (c) 2018-2019 AT&T Intellectual Property.
+        Copyright (c) 2019-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -43,11 +43,11 @@ XappRmr::~XappRmr(void){
 	if (_xapp_rmr_ctx){
 		rmr_close(_xapp_rmr_ctx);
 	}
-
 };
 
 //Get RMR Context.
-void XappRmr::xapp_rmr_init(){
+void XappRmr::xapp_rmr_init(bool rmr_listen){
+
 
 	// Initialize the RMR context
 	_xapp_rmr_ctx = rmr_init(const_cast<char*>(_proto_port.c_str()), RMR_MAX_RCV_BYTES, RMRFL_NONE);
@@ -62,10 +62,22 @@ void XappRmr::xapp_rmr_init(){
 	_rmr_is_ready = true;
 	mdclog_write(MDCLOG_INFO,"RMR Context is Ready, file= %s, line=%d",__FILE__,__LINE__);
 
+	//Set the listener requirement
+	_listen = rmr_listen;
 	return;
 
 }
 
+bool XappRmr::rmr_header(xapp_rmr_header *hdr){
+
+	_xapp_send_buff->mtype  = hdr->message_type;
+	_xapp_send_buff->len = hdr->payload_length;
+	_xapp_send_buff->sub_id = -1;
+	rmr_str2meid(_xapp_send_buff, hdr->meid);
+
+
+	return true;
+}
 
 //RMR Send with payload and header.
 bool XappRmr::xapp_rmr_send(xapp_rmr_header *hdr, void *payload){
@@ -84,7 +96,13 @@ bool XappRmr::xapp_rmr_send(xapp_rmr_header *hdr, void *payload){
 	if( _xapp_send_buff == NULL ) {
 		_xapp_send_buff = rmr_alloc_msg(_xapp_rmr_ctx, RMR_DEF_SIZE);
 	}
-	_xapp_send_buff->mtype  = hdr->message_type;
+
+	bool res = rmr_header(hdr);
+	if(!res){
+		mdclog_write(MDCLOG_ERR,"RMR HEADERS were incorrectly populated, file= %s, line=%d",__FILE__,__LINE__);
+		return false;
+	}
+
 	memcpy(_xapp_send_buff->payload, payload, hdr->payload_length);
 	_xapp_send_buff->len = hdr->payload_length;
 
@@ -94,8 +112,8 @@ bool XappRmr::xapp_rmr_send(xapp_rmr_header *hdr, void *payload){
 	}
 
 	while(rmr_attempts > 0){
-		_xapp_send_buff = rmr_send_msg(_xapp_rmr_ctx,_xapp_send_buff);
 
+		_xapp_send_buff = rmr_send_msg(_xapp_rmr_ctx,_xapp_send_buff);
 		if(!_xapp_send_buff) {
 			mdclog_write(MDCLOG_ERR,"Error In Sending Message , file= %s, line=%d, attempt=%d",__FILE__,__LINE__,rmr_attempts);
 			rmr_attempts--;

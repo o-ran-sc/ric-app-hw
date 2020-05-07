@@ -1,7 +1,7 @@
 /*
 ==================================================================================
 
-        Copyright (c) 2018-2019 AT&T Intellectual Property.
+        Copyright (c) 2019-2020 AT&T Intellectual Property.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -31,12 +31,12 @@
 #include <errno.h>
 #include <mdclog/mdclog.h>
 #include <sstream>
-#include <E2N_E2AP-PDU.h>
-#include <E2N_SuccessfulOutcome.h>
-#include <E2N_UnsuccessfulOutcome.h>
-#include <E2N_RICcontrolAcknowledge.h>
-#include <E2N_RICcontrolFailure.h>
-#include <E2N_ProtocolIE-Field.h>
+#include <E2AP-PDU.h>
+#include <SuccessfulOutcome.h>
+#include <UnsuccessfulOutcome.h>
+#include <RICcontrolAcknowledge.h>
+#include <RICcontrolFailure.h>
+#include <ProtocolIE-Field.h>
 #include "e2ap_control_helper.hpp"
 
 #define NUM_CONTROL_ACKNOWLEDGE_IES 3
@@ -52,22 +52,22 @@ public:
   bool encode_e2ap_control_response(unsigned char *, size_t *,  ric_control_helper &, bool);
 
 
-  bool set_fields(E2N_SuccessfulOutcome_t *, ric_control_helper &);
-  bool get_fields(E2N_SuccessfulOutcome_t *, ric_control_helper &);
+  bool set_fields(SuccessfulOutcome_t *, ric_control_helper &);
+  bool get_fields(SuccessfulOutcome_t *, ric_control_helper &);
 
-  bool set_fields(E2N_UnsuccessfulOutcome_t *, ric_control_helper &);
-  bool get_fields(E2N_UnsuccessfulOutcome_t *, ric_control_helper &);
+  bool set_fields(UnsuccessfulOutcome_t *, ric_control_helper &);
+  bool get_fields(UnsuccessfulOutcome_t *, ric_control_helper &);
   
   std::string get_error(void) const {return error_string ; };
 
 private:
   
-  E2N_E2AP_PDU_t * e2ap_pdu_obj;
-  E2N_SuccessfulOutcome_t * successMsg;
-  E2N_UnsuccessfulOutcome_t * unsuccessMsg;
+  E2AP_PDU_t * e2ap_pdu_obj;
+  SuccessfulOutcome_t * successMsg;
+  UnsuccessfulOutcome_t * unsuccessMsg;
   
-  E2N_RICcontrolAcknowledge_IEs_t *IE_array;
-  E2N_RICcontrolFailure_IEs_t *IE_failure_array;
+  RICcontrolAcknowledge_IEs_t *IE_array;
+  RICcontrolFailure_IEs_t *IE_failure_array;
   
   std::string error_string;
   
