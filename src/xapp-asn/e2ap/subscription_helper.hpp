@@ -34,6 +34,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+
 #include "generic_helpers.hpp"
 
 
@@ -43,20 +44,15 @@ struct Action {
 
 public:
   
-  Action(int id, int type): _is_def(false), _is_subs_act(false), _id(id), _type(type), _next_action(0), _wait(0){};
-  Action(int id, int type, const void *def, size_t def_size, int next, int wait): _is_def(false), _is_subs_act(false), _id(id), _type(type){
+  Action(int id, int type): _is_def(false), _is_subs_act(false), _id(id), _type(type), _next_action(0){};
+  Action(int id, int type, const void *def, size_t def_size, int next_action): _is_def(false), _is_subs_act(false), _id(id), _type(type){
     
-    if (def_size > 0){
       _is_def = true;
       _action_definition.set_ref(def);
       _action_definition.set_size(def_size);
-    }
-    
-    if(next >= 0 && wait >= 0){
       _is_subs_act = true;
-      _next_action = next;
-      _wait = wait;
-    }
+      _next_action = next_action;
+
   };
 
   
@@ -82,10 +78,6 @@ public:
     return _next_action;
   };
 
-  int get_wait() const {
-    return _wait;
-  }
-
   bool is_definition() const{
 
     return _is_def;
@@ -99,7 +91,7 @@ private:
 
   bool _is_def;
   bool _is_subs_act;
-  int _id, _type, _next_action, _wait, _cause, _sub_cause;
+  int _id, _type, _next_action, _cause, _sub_cause;
   bool _is_admit;
   octet_helper _action_definition;
 
@@ -116,22 +108,19 @@ struct subscription_helper {
 public:
 
   using action_t = std::vector<Action>;
-  
   subscription_helper(){
-    _action_ref = std::make_unique<action_t>();
-    curr_index = 0;    
-  };
-  
+     _action_ref = std::make_unique<action_t>();
+   };
+
   action_t * get_list() const {return _action_ref.get();};
 
   void clear(void){
     _action_ref.get()->clear();
   }
   
-  void set_request(int id, int seq_no){
+  void set_request(int id){
     _req_id = id;
-    _req_seq_no = seq_no;
-    
+
   };
 
   void set_function_id(int id){
@@ -149,8 +138,8 @@ public:
     _action_ref.get()->push_back(a);
   };
 
-  void add_action(int id, int type, std::string action_def, int next_action, int wait_time){
-    Action a (id, type, action_def.c_str(), action_def.length(), next_action, wait_time);
+  void add_action(int id, int type, const void *action_def, size_t size, int next_action){
+    Action a (id, type, action_def, size, next_action);
     _action_ref.get()->push_back(a);
   };
 
@@ -159,9 +148,6 @@ public:
     return _req_id;
   }
 
-  int  get_req_seq(void) const {
-    return _req_seq_no;
-  }
 
   int  get_function_id(void) const{
     return _func_id;
@@ -177,7 +163,6 @@ public:
 
   void print_sub_info(void){
     std::cout <<"Request ID = " << _req_id << std::endl;
-    std::cout <<"Request Sequence Number = " << _req_seq_no << std::endl;
     std::cout <<"RAN Function ID = " << _func_id << std::endl;
     for(auto const & e: *(_action_ref.get())){
       std::cout <<"Action ID = " << e.get_id() << " Action Type = " << e.get_type() << std::endl;
@@ -188,8 +173,9 @@ private:
   
   std::unique_ptr<action_t> _action_ref;
   int curr_index;
-  int _req_id, _req_seq_no, _func_id;
+  int _req_id, _func_id;
   octet_helper _event_def;
+
 };
 
 #endif

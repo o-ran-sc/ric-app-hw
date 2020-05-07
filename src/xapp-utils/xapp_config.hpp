@@ -31,23 +31,16 @@
 #include <cstdlib>
 #include <mdclog/mdclog.h>
 
-#define MAX_SLEEP 86400
-
-#define DEFAULT_A1_SCHEMA_FILE "/etc/xapp/a1-schema.json"
-#define DEFAULT_XAPP_ID "hw-xapp-123"
-#define DEFAULT_VES_SCHEMA_FILE "/etc/xapp/ves-schema.json"
-#define DEFAULT_VES_COLLECTOR_URL "127.0.0.1:6350"
-#define DEFAULT_VES_MEASUREMENT_INTERVAL 10
+#define DEFAULT_XAPP_NAME "HW-Xapp"
 #define DEFAULT_PORT "4560"
-#define DEFAULT_BUFFER "1024"
-#define DEFAULT_GNODEB	"GNB123"
-#define DEFAULT_OPERATING_MODE "report"
+#define DEFAULT_MSG_MAX_BUFFER "2072"
+#define DEFAULT_THREADS "1"
+
 #define DEFAULT_LOG_LEVEL	MDCLOG_WARN
 
-#define ASN_BUFF_MAX_SIZE		512
+#define ASN_BUFF_MAX_SIZE		4096
 #define MAX_SUBSCRIPTION_ATTEMPTS	10
 #define HELLOWORLD_POLICY_ID 00000
-#define DEFAULT_THREADS 1
 
 using namespace std;
 
@@ -57,17 +50,10 @@ public:
 	typedef enum{
 		  XAPP_ID,
 		  XAPP_NAME,
-		  HW_PORTS,
+		  HW_PORT,
 		  MSG_MAX_BUFFER,
-		  GNODEB,
 		  THREADS,
-		  A1_SCHEMA_FILE,
-		  VES_SCHEMA_FILE,
-		  SAMPLE_FILE,
-		  VES_COLLECTOR_URL,
-		  VES_MEASUREMENT_INTERVAL,
-		  LOG_LEVEL,
-		  OPERATING_MODE
+		  LOG_LEVEL
 	}SettingName;
 
 	void loadDefaultSettings();

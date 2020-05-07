@@ -33,18 +33,18 @@
 ric_control_request::ric_control_request(void){
 
   e2ap_pdu_obj = 0;
-  e2ap_pdu_obj = (E2N_E2AP_PDU_t * )calloc(1, sizeof(E2N_E2AP_PDU_t));
+  e2ap_pdu_obj = (E2AP_PDU_t * )calloc(1, sizeof(E2AP_PDU_t));
   assert(e2ap_pdu_obj != 0);
 
   initMsg = 0;
-  initMsg = (E2N_InitiatingMessage_t * )calloc(1, sizeof(E2N_InitiatingMessage_t));
+  initMsg = (InitiatingMessage_t * )calloc(1, sizeof(InitiatingMessage_t));
   assert(initMsg != 0);
 
   IE_array = 0;
-  IE_array = (E2N_RICcontrolRequest_IEs_t *)calloc(NUM_CONTROL_REQUEST_IES, sizeof(E2N_RICcontrolRequest_IEs_t));
+  IE_array = (RICcontrolRequest_IEs_t *)calloc(NUM_CONTROL_REQUEST_IES, sizeof(RICcontrolRequest_IEs_t));
   assert(IE_array != 0);
 
-  e2ap_pdu_obj->present = E2N_E2AP_PDU_PR_initiatingMessage;
+  e2ap_pdu_obj->present = E2AP_PDU_PR_initiatingMessage;
   e2ap_pdu_obj->choice.initiatingMessage = initMsg;
 
   
@@ -56,7 +56,7 @@ ric_control_request::~ric_control_request(void){
 
   mdclog_write(MDCLOG_DEBUG, "Freeing E2AP Control Request object memory");
   
-  E2N_RICcontrolRequest_t *ricControl_Request  = &(initMsg->value.choice.RICcontrolRequest);
+  RICcontrolRequest_t *ricControl_Request  = &(initMsg->value.choice.RICcontrolRequest);
   for(int i = 0; i < ricControl_Request->protocolIEs.list.size; i++){
     ricControl_Request->protocolIEs.list.array[i] = 0;
   }
@@ -71,17 +71,17 @@ ric_control_request::~ric_control_request(void){
   free(initMsg);
   e2ap_pdu_obj->choice.initiatingMessage = 0;
   
-  ASN_STRUCT_FREE(asn_DEF_E2N_E2AP_PDU, e2ap_pdu_obj);
-  mdclog_write(MDCLOG_DEBUG, "Freed E2N_E2AP Control Request object mempory");
+  ASN_STRUCT_FREE(asn_DEF_E2AP_PDU, e2ap_pdu_obj);
+  mdclog_write(MDCLOG_DEBUG, "Freed E2AP Control Request object mempory");
   
 }
 
 
 bool ric_control_request::encode_e2ap_control_request(unsigned char *buf, size_t *size, ric_control_helper & dinput){
 
-  initMsg->procedureCode = E2N_ProcedureCode_id_ricControl;
-  initMsg->criticality = E2N_Criticality_ignore;
-  initMsg->value.present = E2N_InitiatingMessage__value_PR_RICcontrolRequest;
+  initMsg->procedureCode = ProcedureCode_id_RICcontrol;
+  initMsg->criticality = Criticality_ignore;
+  initMsg->value.present = InitiatingMessage__value_PR_RICcontrolRequest;
 
   bool res;
   
@@ -90,16 +90,16 @@ bool ric_control_request::encode_e2ap_control_request(unsigned char *buf, size_t
     return false;
   }
 
-  int ret_constr = asn_check_constraints(&asn_DEF_E2N_E2AP_PDU, (void *) e2ap_pdu_obj, errbuf, &errbuf_len);
+  int ret_constr = asn_check_constraints(&asn_DEF_E2AP_PDU, (void *) e2ap_pdu_obj, errbuf, &errbuf_len);
   if(ret_constr){
     error_string.assign(errbuf, errbuf_len);
     error_string = "Constraints failed for encoding control . Reason = " + error_string;
     return false;
   }
 
-  //xer_fprint(stdout, &asn_DEF_E2N_E2AP_PDU, e2ap_pdu_obj);
+  //xer_fprint(stdout, &asn_DEF_E2AP_PDU, e2ap_pdu_obj);
   
-  asn_enc_rval_t retval = asn_encode_to_buffer(0, ATS_ALIGNED_BASIC_PER, &asn_DEF_E2N_E2AP_PDU, e2ap_pdu_obj, buf, *size);
+  asn_enc_rval_t retval = asn_encode_to_buffer(0, ATS_ALIGNED_BASIC_PER, &asn_DEF_E2AP_PDU, e2ap_pdu_obj, buf, *size);
   
   if(retval.encoded == -1){
     error_string.assign(strerror(errno));
@@ -119,7 +119,7 @@ bool ric_control_request::encode_e2ap_control_request(unsigned char *buf, size_t
   
 }
 
-bool ric_control_request::set_fields(E2N_InitiatingMessage_t *initMsg, ric_control_helper &dinput){
+bool ric_control_request::set_fields(InitiatingMessage_t *initMsg, ric_control_helper &dinput){
   unsigned int ie_index;
 
   if (initMsg == 0){
@@ -127,7 +127,7 @@ bool ric_control_request::set_fields(E2N_InitiatingMessage_t *initMsg, ric_contr
     return false;
   }
 
-  E2N_RICcontrolRequest_t * ric_control_request = &(initMsg->value.choice.RICcontrolRequest);
+  RICcontrolRequest_t * ric_control_request = &(initMsg->value.choice.RICcontrolRequest);
   ric_control_request->protocolIEs.list.count = 0; // reset 
   
   // for(i = 0; i < NUM_CONTROL_REQUEST_IES;i++){
@@ -136,44 +136,44 @@ bool ric_control_request::set_fields(E2N_InitiatingMessage_t *initMsg, ric_contr
  
   // Mandatory IE
   ie_index = 0;
-  E2N_RICcontrolRequest_IEs_t *ies_ricreq = &IE_array[ie_index];  
-  ies_ricreq->criticality = E2N_Criticality_reject;
-  ies_ricreq->id = E2N_ProtocolIE_ID_id_RICrequestID;
-  ies_ricreq->value.present = E2N_RICcontrolRequest_IEs__value_PR_RICrequestID;
-  E2N_RICrequestID_t *ricrequest_ie = &ies_ricreq->value.choice.RICrequestID;
+  RICcontrolRequest_IEs_t *ies_ricreq = &IE_array[ie_index];
+  ies_ricreq->criticality = Criticality_reject;
+  ies_ricreq->id = ProtocolIE_ID_id_RICrequestID;
+  ies_ricreq->value.present = RICcontrolRequest_IEs__value_PR_RICrequestID;
+  RICrequestID_t *ricrequest_ie = &ies_ricreq->value.choice.RICrequestID;
   ricrequest_ie->ricRequestorID = dinput.req_id;
-  ricrequest_ie->ricRequestSequenceNumber = dinput.req_seq_no;
+  //ricrequest_ie->ricRequestSequenceNumber = dinput.req_seq_no;
   ASN_SEQUENCE_ADD(&(ric_control_request->protocolIEs), &(IE_array[ie_index]));
 
   // Mandatory IE
   ie_index = 1;
-  E2N_RICcontrolRequest_IEs_t *ies_ranfunc = &IE_array[ie_index];
-  ies_ranfunc->criticality = E2N_Criticality_reject;
-  ies_ranfunc->id = E2N_ProtocolIE_ID_id_RANfunctionID;
-  ies_ranfunc->value.present = E2N_RICcontrolRequest_IEs__value_PR_RANfunctionID;
-  E2N_RANfunctionID_t *ranfunction_ie = &ies_ranfunc->value.choice.RANfunctionID;
+  RICcontrolRequest_IEs_t *ies_ranfunc = &IE_array[ie_index];
+  ies_ranfunc->criticality = Criticality_reject;
+  ies_ranfunc->id = ProtocolIE_ID_id_RANfunctionID;
+  ies_ranfunc->value.present = RICcontrolRequest_IEs__value_PR_RANfunctionID;
+  RANfunctionID_t *ranfunction_ie = &ies_ranfunc->value.choice.RANfunctionID;
   *ranfunction_ie = dinput.func_id;
   ASN_SEQUENCE_ADD(&(ric_control_request->protocolIEs), &(IE_array[ie_index]));
 
 
   // Mandatory IE
   ie_index = 2;
-  E2N_RICcontrolRequest_IEs_t *ies_richead = &IE_array[ie_index];
-  ies_richead->criticality = E2N_Criticality_reject;
-  ies_richead->id = E2N_ProtocolIE_ID_id_RICcontrolHeader;
-  ies_richead->value.present = E2N_RICcontrolRequest_IEs__value_PR_RICcontrolHeader;
-  E2N_RICcontrolHeader_t *richeader_ie = &ies_richead->value.choice.RICcontrolHeader;
+  RICcontrolRequest_IEs_t *ies_richead = &IE_array[ie_index];
+  ies_richead->criticality = Criticality_reject;
+  ies_richead->id = ProtocolIE_ID_id_RICcontrolHeader;
+  ies_richead->value.present = RICcontrolRequest_IEs__value_PR_RICcontrolHeader;
+  RICcontrolHeader_t *richeader_ie = &ies_richead->value.choice.RICcontrolHeader;
   richeader_ie->buf = dinput.control_header;
   richeader_ie->size = dinput.control_header_size;
   ASN_SEQUENCE_ADD(&(ric_control_request->protocolIEs), &(IE_array[ie_index]));
 
   // Mandatory IE
   ie_index = 3;
-  E2N_RICcontrolRequest_IEs_t *ies_indmsg = &IE_array[ie_index];
-  ies_indmsg->criticality = E2N_Criticality_reject;
-  ies_indmsg->id = E2N_ProtocolIE_ID_id_RICcontrolMessage;
-  ies_indmsg->value.present = E2N_RICcontrolRequest_IEs__value_PR_RICcontrolMessage;
-  E2N_RICcontrolMessage_t *ricmsg_ie = &ies_indmsg->value.choice.RICcontrolMessage;
+  RICcontrolRequest_IEs_t *ies_indmsg = &IE_array[ie_index];
+  ies_indmsg->criticality = Criticality_reject;
+  ies_indmsg->id = ProtocolIE_ID_id_RICcontrolMessage;
+  ies_indmsg->value.present = RICcontrolRequest_IEs__value_PR_RICcontrolMessage;
+  RICcontrolMessage_t *ricmsg_ie = &ies_indmsg->value.choice.RICcontrolMessage;
   ricmsg_ie->buf = dinput.control_msg;
   ricmsg_ie->size = dinput.control_msg_size;
   ASN_SEQUENCE_ADD(&(ric_control_request->protocolIEs), &(IE_array[ie_index]));
@@ -181,11 +181,11 @@ bool ric_control_request::set_fields(E2N_InitiatingMessage_t *initMsg, ric_contr
   // Optional IE
   ie_index = 4;
   if (dinput.control_ack >= 0){
-    E2N_RICcontrolRequest_IEs_t *ies_indtyp = &IE_array[ie_index];
-    ies_indtyp->criticality = E2N_Criticality_reject;
-    ies_indtyp->id = E2N_ProtocolIE_ID_id_RICcontrolAckRequest;
-    ies_indtyp->value.present = E2N_RICcontrolRequest_IEs__value_PR_RICcontrolAckRequest;
-    E2N_RICcontrolAckRequest_t *ricackreq_ie = &ies_indtyp->value.choice.RICcontrolAckRequest;
+    RICcontrolRequest_IEs_t *ies_indtyp = &IE_array[ie_index];
+    ies_indtyp->criticality = Criticality_reject;
+    ies_indtyp->id = ProtocolIE_ID_id_RICcontrolAckRequest;
+    ies_indtyp->value.present = RICcontrolRequest_IEs__value_PR_RICcontrolAckRequest;
+    RICcontrolAckRequest_t *ricackreq_ie = &ies_indtyp->value.choice.RICcontrolAckRequest;
     *ricackreq_ie = dinput.control_ack;
     ASN_SEQUENCE_ADD(&(ric_control_request->protocolIEs), &(IE_array[ie_index]));
   }
@@ -193,11 +193,11 @@ bool ric_control_request::set_fields(E2N_InitiatingMessage_t *initMsg, ric_contr
   // Optional IE
   ie_index = 5;
   if(dinput.call_process_id_size > 0){
-    E2N_RICcontrolRequest_IEs_t *ies_callprocid = &IE_array[ie_index];
-    ies_callprocid->criticality = E2N_Criticality_reject;
-    ies_callprocid->id = E2N_ProtocolIE_ID_id_RICcallProcessID;
-    ies_callprocid->value.present = E2N_RICcontrolRequest_IEs__value_PR_RICcallProcessID;
-    E2N_RICcallProcessID_t *riccallprocessid_ie = &ies_callprocid->value.choice.RICcallProcessID;
+    RICcontrolRequest_IEs_t *ies_callprocid = &IE_array[ie_index];
+    ies_callprocid->criticality = Criticality_reject;
+    ies_callprocid->id = ProtocolIE_ID_id_RICcallProcessID;
+    ies_callprocid->value.present = RICcontrolRequest_IEs__value_PR_RICcallProcessID;
+    RICcallProcessID_t *riccallprocessid_ie = &ies_callprocid->value.choice.RICcallProcessID;
     riccallprocessid_ie->buf = dinput.call_process_id;
     riccallprocessid_ie->size = dinput.call_process_id_size;
     ASN_SEQUENCE_ADD(&(ric_control_request->protocolIEs), &(IE_array[ie_index]));
@@ -210,7 +210,7 @@ bool ric_control_request::set_fields(E2N_InitiatingMessage_t *initMsg, ric_contr
   
 
 
-bool ric_control_request:: get_fields(E2N_InitiatingMessage_t * init_msg,  ric_control_helper &dout)
+bool ric_control_request:: get_fields(InitiatingMessage_t * init_msg,  ric_control_helper &dout)
 {
   if (init_msg == 0){
     error_string = "Invalid reference for E2AP Control_Request message in get_fields";
@@ -219,35 +219,35 @@ bool ric_control_request:: get_fields(E2N_InitiatingMessage_t * init_msg,  ric_c
   
  
   for(int edx = 0; edx < init_msg->value.choice.RICcontrolRequest.protocolIEs.list.count; edx++) {
-    E2N_RICcontrolRequest_IEs_t *memb_ptr = init_msg->value.choice.RICcontrolRequest.protocolIEs.list.array[edx];
+    RICcontrolRequest_IEs_t *memb_ptr = init_msg->value.choice.RICcontrolRequest.protocolIEs.list.array[edx];
     
     switch(memb_ptr->id)
       {
-      case (E2N_ProtocolIE_ID_id_RICcontrolHeader):
+      case (ProtocolIE_ID_id_RICcontrolHeader):
   	dout.control_header = memb_ptr->value.choice.RICcontrolHeader.buf;
   	dout.control_header_size = memb_ptr->value.choice.RICcontrolHeader.size;
   	break;
 	
-      case (E2N_ProtocolIE_ID_id_RICcontrolMessage):
+      case (ProtocolIE_ID_id_RICcontrolMessage):
   	dout.control_msg =  memb_ptr->value.choice.RICcontrolMessage.buf;
   	dout.control_msg_size = memb_ptr->value.choice.RICcontrolMessage.size;
   	break;
 
-      case (E2N_ProtocolIE_ID_id_RICcallProcessID):
+      case (ProtocolIE_ID_id_RICcallProcessID):
   	dout.call_process_id =  memb_ptr->value.choice.RICcallProcessID.buf;
   	dout.call_process_id_size = memb_ptr->value.choice.RICcallProcessID.size;
   	break;
 
-      case (E2N_ProtocolIE_ID_id_RICrequestID):
+      case (ProtocolIE_ID_id_RICrequestID):
   	dout.req_id = memb_ptr->value.choice.RICrequestID.ricRequestorID;
-  	dout.req_seq_no = memb_ptr->value.choice.RICrequestID.ricRequestSequenceNumber;
+  	//dout.req_seq_no = memb_ptr->value.choice.RICrequestID.ricRequestSequenceNumber;
   	break;
 	
-      case (E2N_ProtocolIE_ID_id_RANfunctionID):
+      case (ProtocolIE_ID_id_RANfunctionID):
   	dout.func_id = memb_ptr->value.choice.RANfunctionID;
   	break;
 	
-      case (E2N_ProtocolIE_ID_id_RICcontrolAckRequest):
+      case (ProtocolIE_ID_id_RICcontrolAckRequest):
   	dout.control_ack = memb_ptr->value.choice.RICcontrolAckRequest;
   	break;
 	
@@ -261,6 +261,6 @@ bool ric_control_request:: get_fields(E2N_InitiatingMessage_t * init_msg,  ric_c
 
 }
 
-E2N_InitiatingMessage_t * ric_control_request::get_message(void)  {
+InitiatingMessage_t * ric_control_request::get_message(void)  {
     return initMsg;
 }
