@@ -7,14 +7,14 @@ UTILSRC=../src/xapp-utils
 MGMTSRC:=../src/xapp-mgmt
 
 ASNSRC:=../asn1c_defs
-E2APSRC:=../src/xapp-formats/e2ap
-E2SMSRC:=../src/xapp-formats/e2sm
+E2APSRC:=../src/xapp-asn/e2ap
+E2SMSRC:=../src/xapp-asn/e2sm
 
 ####### Logging library and flags
 CLOGFLAGS:= `pkg-config mdclog --cflags`
 LOG_LIBS:= `pkg-config mdclog --libs`
 CURL_LIBS:= `pkg-config libcurl --libs`
-RNIB_LIBS:= -pthread /usr/local/lib/rnibreader_old.a
+RNIB_LIBS:= -pthread /usr/local/include/rnib/rnibreader.a
 GTEST_LIBS:= -lgtest -lgtest_main
 ######## Keep include dirs separate so we have transparency
 
