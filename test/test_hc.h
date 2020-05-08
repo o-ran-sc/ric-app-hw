@@ -30,6 +30,7 @@
 #include "xapp.hpp"
 #define HC_MSG_SIZE 512
 
+
 using namespace std;
 TEST(Xapp, RMRHealthCheck){
 
@@ -38,7 +39,7 @@ TEST(Xapp, RMRHealthCheck){
 
 	 std::unique_ptr<XappRmr> rmr;
 	 rmr = std::make_unique<XappRmr>("4560",num_attempts);
-	 rmr->xapp_rmr_init();
+	 rmr->xapp_rmr_init(true);
 
 	 XappSettings config;
 
@@ -61,10 +62,10 @@ TEST(Xapp, RMRHealthCheck){
 		 bool res = rmr->xapp_rmr_send(&hdr,(void*)strMsg);
 		 usleep(1);
 	 }
-	 sleep(10);
+	 sleep(2);
 	 hw_xapp->stop();
-	 sleep(10);
- };
+
+};
 
 TEST(Xapp, A1HealthCheck){
 
@@ -80,7 +81,7 @@ TEST(Xapp, A1HealthCheck){
 
 	std::unique_ptr<XappRmr> rmr;
 	rmr = std::make_unique<XappRmr>("4560",num_attempts);
-	rmr->xapp_rmr_init();
+	rmr->xapp_rmr_init(true);
 
 	XappSettings config;
 
@@ -106,8 +107,6 @@ TEST(Xapp, A1HealthCheck){
 	bool res_msg2 = rmr->xapp_rmr_send(&hdr,(void*)strMsg);
 	ASSERT_TRUE(res_msg2);
 
-	sleep(10);
+	sleep(2);
 	hw_xapp->stop();
-	sleep(10);
-
 }
