@@ -16,6 +16,23 @@
       "revId": "dc1b16498a4b15abb3daab7938790de9e7f9aeeb",
       "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "31c46aef_6837b3cc",
+        "filename": "src/xapp-asn/e2sm/e2sm-HelloWorld-v001.asn",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-08T18:22:43Z",
+      "side": 1,
+      "message": "Can we add a license to the top of this file?",
+      "revId": "dc1b16498a4b15abb3daab7938790de9e7f9aeeb",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
     }
   ]
 }
