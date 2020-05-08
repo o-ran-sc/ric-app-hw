@@ -15,53 +15,50 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 ==================================================================================
-/*
- * test_rnib.h
- *
- *  Created on: Mar 23, 2020
- *  Author: Shraboni Jana
- */
-
-#ifndef TEST_TEST_DB_H_
-#define TEST_TEST_DB_H_
+*/
+#ifndef TEST_TEST_SUBS_H_
+#define TEST_TEST_SUBS_H_
 
 #include<iostream>
 #include<gtest/gtest.h>
 #include "xapp.hpp"
+#define BUFFER_SIZE 1024
 
 using namespace std;
+//generating a E2AP Subscription Message
+TEST(SUBSCRIPTION, Request){
 
-TEST(Xapp, getGNBlist)
-{
-	XappSettings config;
-	XappRmr rmr("7001");
 
-	Xapp hw_xapp(std::ref(config),rmr);
-	hw_xapp.set_rnib_gnblist();
-	auto gnblist = hw_xapp.get_rnib_gnblist();
-	int sz = gnblist.size();
-	EXPECT_GE(sz,0);
-	std::cout << "************gnb ids retrieved using R-NIB**************" << std::endl;
-	for(int i = 0; i<sz; i++){
-		std::cout << gnblist[i] << std::endl;
-	}
+	subscription_helper  din;
+	subscription_helper  dout;
 
-}
+	subscription_request sub_req;
+	subscription_request sub_recv;
 
-TEST(Xapp, SDLData){
+	unsigned char buf[BUFFER_SIZE];
+	size_t buf_size = BUFFER_SIZE;
+	bool res;
 
-	//Xapp's SDL namespace.
-    std::string nmspace = "hw-xapp";
-	XappSDL xappsdl(nmspace);
 
-	std::unique_ptr<shareddatalayer::SyncStorage> sdl(shareddatalayer::SyncStorage::create());
-	bool res = xappsdl.set_data(sdl.get());
+	//Random Data  for request
+	int request_id = 1;
+	int function_id = 0;
+	std::string event_def = "HelloWorld Event Definition";
+
+	din.set_request(request_id);
+	din.set_function_id(function_id);
+	din.set_event_def(event_def.c_str(), event_def.length());
+
+	std::string act_def = "HelloWorld Action Definition";
+
+	din.add_action(1,1,(void*)act_def.c_str(), act_def.length(), 0);
+
+	res = sub_req.encode_e2ap_subscription(&buf[0], &buf_size, din);
 	ASSERT_TRUE(res);
 
-	xappsdl.get_data(sdl.get());
+
 
 }
 
 
-
-#endif /* TEST_TEST_DB_H_ */
+#endif /* TEST_TEST_SUBS_H_ */
