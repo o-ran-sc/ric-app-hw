@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bedc0624_ddc99738",
+        "filename": "docs/conf.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-26T19:08:49Z",
+      "side": 1,
+      "message": "This is causing tox to grumble about the same section title appearing in multiple documents.  I\u0027d remove it, or you need to change the \"Introduction\" title in the user guide or in the installation guide so that they aren\u0027t duplicates.",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 44
+      },
+      "revId": "ac9c2b52f7dc2a79c780c1b136fc75866230e7dd",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "306372c5_aa60c035",
+        "filename": "docs/installation-guide.rst",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-05-26T19:08:49Z",
+      "side": 1,
+      "message": "It\u0027s grumbling about the extra space before the final |",
+      "range": {
+        "startLine": 24,
+        "startChar": 84,
+        "endLine": 24,
+        "endChar": 85
+      },
+      "revId": "ac9c2b52f7dc2a79c780c1b136fc75866230e7dd",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
