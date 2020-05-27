@@ -30,7 +30,7 @@ import sys;
 import os;
 import signal;
 import time;
-
+import ast;
 
 def signal_handler(signum, frame):
     print("Received signal {0}\n".format(signum));
@@ -42,13 +42,20 @@ def signal_handler(signum, frame):
         
 
 def parseConfigJson(config):
+    
     for k1 in config.keys():
-        for k2 in config[k1].keys():
-            #print(k2);
-            if k2 in ParseSection:
-                result = ParseSection[k2](config[k1]);
-                if result == False:
+        if k1 in ParseSection:
+            result = ParseSection[k1](config);
+            if result == False:
                     return False;
+
+        
+#        for k2 in config[k1].keys():
+            #print(k2);
+#            if k2 in ParseSection:
+#                result = ParseSection[k2](config[k1]);
+#                if result == False:
+#                    return False;
 
 
         
@@ -70,7 +77,9 @@ def getXappName(config):
     if myKey not in config.keys():
         print(("Error ! No information found for {0} in config\n".format(myKey)));
         return False;
+
     xapp_name = config[myKey];
+    print("Xapp Name is: " + xapp_name); 
     os.environ["XAPP_NAME"] = xapp_name;
 
 default_routing_file = "/tmp/routeinfo/routes.txt";
