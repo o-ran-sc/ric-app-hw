@@ -1,5 +1,4 @@
-{
-    "config-file.json": {
+ {
         "xapp_name": "hwxapp",
         "version": "1.0.0",
         "containers": [
@@ -8,20 +7,10 @@
                 "image": {
                     "registry": "nexus3.o-ran-sc.org:10002",
                     "name": "o-ran-sc/ric-app-hw",
-                    "tag": "0.0.1"
-                },
-                "command": "python3 init.py config-file.json"
+                    "tag": "1.0.1"
+               	}
             }
         ],
-        "livenessProbe": {
-            "exec": {
-                "command": [
-                    "/usr/local/bin/health_ck"
-                ]
-            },
-            "initialDelaySeconds": 5,
-            "periodSeconds": 15
-        },
         "messaging": {
             "ports": [
                 {
@@ -30,10 +19,9 @@
                     "port": 4560,
                     "rxMessages": [ 
 						"RIC_SUB_RESP", 
-						"RIC_SUB_FAILURE", 
-						"RIC_SUB_DEL_RESP", "RIC_SUB_DEL_FAILURE", "RIC_INDICATION", "RIC_CONTROL_ACK", "RIC_CONTROL_FAILURE", "A1_POLICY_REQ", "RIC_HEALTH_CHECK_REQ" 
+						"A1_POLICY_REQ", "RIC_HEALTH_CHECK_REQ" 
                     ],
-                    "txMessages": [ "RIC_SUB_REQ", "RIC_SUB_DEL_REQ", "RIC_CONTROL_REQ", "A1_POLICY_RESP", "A1_POLICY_QUERY", "RIC_HEALTH_CHECK_RESP" ],
+                    "txMessages": [ "RIC_SUB_REQ", "A1_POLICY_RESP", "A1_POLICY_QUERY", "RIC_HEALTH_CHECK_RESP" ],
                     "policies": [1],
                     "description": "rmr receive data port for HWxapp"
                 },
@@ -45,39 +33,16 @@
                 }
             ]
         },
-        "controls": {
-            "ves_collector_address": "xapp-sandbox2.research.att.com:8888"
-        },
         "rmr": {
             "protPort": "tcp:4560",
             "maxSize": 2072,
             "numWorkers": 1,
             "txMessages": [
-                "RIC_SUB_REQ", "RIC_SUB_DEL_REQ", "RIC_CONTROL_REQ", "A1_POLICY_RESP", "A1_POLICY_QUERY", "RIC_HEALTH_CHECK_RESP"
+                "RIC_SUB_REQ", "A1_POLICY_RESP", "A1_POLICY_QUERY", "RIC_HEALTH_CHECK_RESP"
             ],
             "rxMessages": [
                 "RIC_SUB_RESP", 
-				"RIC_SUB_FAILURE", 
-				"RIC_SUB_DEL_RESP", "RIC_SUB_DEL_FAILURE", "RIC_INDICATION", "RIC_CONTROL_ACK", "RIC_CONTROL_FAILURE", "A1_POLICY_REQ", "RIC_HEALTH_CHECK_REQ"              
+				"A1_POLICY_REQ", "RIC_HEALTH_CHECK_REQ"              
             ]
         }
-    },
-  "controls-schema.json": {
-        "$schema": "http://json-schema.org/draft-07/schema#",
-        "$id": "#/controls",
-        "type": "object",
-        "title": "Controls Section Schema",
-        "required": [],
-        "properties": {
-            "ves_collector_address": {
-                "$id": "#/controls/ves_collector_address",
-                "type": "string",
-                "title": "ves_collector_address",
-                "default": "localhost:8080",
-                "examples": [
-                    "localhost:8080"
-                ]
-            }
-        }
-    }
-}
+  }
