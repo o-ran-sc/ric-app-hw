@@ -55,13 +55,12 @@ class Xapp{
 public:
 
   Xapp(XappSettings &, XappRmr &);
-  Xapp(XappSettings &, XappRmr &, SubscriptionHandler &);
 
   ~Xapp(void);
 
   void stop(void);
 
-  void startup();
+  void startup(SubscriptionHandler &);
   void shutdown(void);
 
   void start_xapp_receiver(XappMsgHandler &);
@@ -94,7 +93,6 @@ private:
   std::vector<std::thread> xapp_rcv_thread;
   std::vector<std::string> rnib_gnblist;
   std::vector<XappMsgHandler> _callbacks;
-
 };
 
 

@@ -40,7 +40,7 @@
 
 #define ASN_BUFF_MAX_SIZE		4096
 #define MAX_SUBSCRIPTION_ATTEMPTS	10
-#define HELLOWORLD_POLICY_ID 00000
+#define HELLOWORLD_POLICY_ID 2
 
 using namespace std;
 
