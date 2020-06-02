@@ -60,25 +60,22 @@ int main(int argc, char *argv[]){
 
 
 	//Create Subscription Handler if Xapp deals with Subscription.
-	bool sub_required = true;
 	std::unique_ptr<SubscriptionHandler> sub_handler = std::make_unique<SubscriptionHandler>();
 
 	//create HelloWorld Xapp Instance.
 	std::unique_ptr<Xapp> hw_xapp;
-	if(sub_required)
-		hw_xapp = std::make_unique<Xapp>(std::ref(config),std::ref(*rmr), std::ref(*sub_handler));
-	else
-		hw_xapp = std::make_unique<Xapp>(std::ref(config),std::ref(*rmr));
+	hw_xapp = std::make_unique<Xapp>(std::ref(config),std::ref(*rmr));
 
 	mdclog_write(MDCLOG_INFO, "Created Hello World Xapp Instance");
 
 	sleep(1);
 	//Startup E2 subscription and A1 policy
-	hw_xapp->startup();
+	hw_xapp->startup(std::ref(*sub_handler));
 
 
 	//start listener threads and register message handlers.
 	int num_threads = std::stoi(config[XappSettings::SettingName::THREADS]);
+	bool sub_required = true;
 	for(int j=0; j < num_threads; j++) {
 		std::unique_ptr<XappMsgHandler> mp_handler;
 		if(sub_required)

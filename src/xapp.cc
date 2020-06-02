@@ -23,6 +23,7 @@
  */
 
 #include "xapp.hpp"
+#define BUFFER_SIZE 1024
 
  Xapp::Xapp(XappSettings &config, XappRmr &rmr){
 
@@ -32,16 +33,6 @@
 	  subhandler_ref = NULL;
 	  return;
   }
-
-Xapp::Xapp(XappSettings &config, XappRmr &rmr, SubscriptionHandler &sub_ref){
-		rmr_ref = &rmr;
-		config_ref = &config;
-		xapp_mutex = NULL;
-		subhandler_ref = &sub_ref;
-		set_rnib_gnblist();
-
-		return;
-	};
 
 Xapp::~Xapp(void){
 
@@ -75,7 +66,11 @@ void Xapp::stop(void){
 	sleep(10);
 }
 
-void Xapp::startup() {
+void Xapp::startup(SubscriptionHandler &sub_ref) {
+
+	subhandler_ref = &sub_ref;
+	set_rnib_gnblist();
+
 	//send subscriptions.
 	startup_subscribe_requests();
 
@@ -129,30 +124,60 @@ void Xapp::startup_subscribe_requests(void ){
    unsigned char meid[RMR_MAX_MEID];
    std::string xapp_id = config_ref->operator [](XappSettings::SettingName::XAPP_ID);
 
-   mdclog_write(MDCLOG_INFO,"Sending subscription in file= %s, line=%d",__FILE__,__LINE__);
+   mdclog_write(MDCLOG_INFO,"Preparing to send subscription in file= %s, line=%d",__FILE__,__LINE__);
 
    auto gnblist = get_rnib_gnblist();
+
    int sz = gnblist.size();
+
+   if(sz <= 0)
+	   mdclog_write(MDCLOG_INFO,"Subscriptions cannot be sent as GNBList in RNIB is NULL");
 
    for(int i = 0; i<sz; i++){
 
 	 //give the message to subscription handler, along with the transmitter.
 	 strcpy((char*)meid,gnblist[i].c_str());
 
-	 char *strMsg = "Subscription Request from HelloWorld XApp\0";
- 	 strncpy((char *)data,strMsg,strlen(strMsg));
- 	 data_size = strlen(strMsg);
+	// char *strMsg = "Subscription Request from HelloWorld XApp\0";
+ 	// strncpy((char *)data,strMsg,strlen(strMsg));
+ 	// data_size = strlen(strMsg);
+
+	 subscription_helper  din;
+	 subscription_helper  dout;
+
+	 subscription_request sub_req;
+	 subscription_request sub_recv;
+
+	 unsigned char buf[BUFFER_SIZE];
+	 size_t buf_size = BUFFER_SIZE;
+	 bool res;
+
+
+	 //Random Data  for request
+	 int request_id = 1;
+	 int function_id = 0;
+	 std::string event_def = "HelloWorld Event Definition";
+
+	 din.set_request(request_id);
+	 din.set_function_id(function_id);
+	 din.set_event_def(event_def.c_str(), event_def.length());
+
+	 std::string act_def = "HelloWorld Action Definition";
+
+	 din.add_action(1,1,(void*)act_def.c_str(), act_def.length(), 0);
+
+	 res = sub_req.encode_e2ap_subscription(&buf[0], &buf_size, din);
 
  	 xapp_rmr_header rmr_header;
  	 rmr_header.message_type = RIC_SUB_REQ;
- 	 rmr_header.payload_length = data_size;
- 	 strcpy((char*)rmr_header.meid,gnblist[i].c_str());
+ 	 rmr_header.payload_length = buf_size; //data_size
+  	 strcpy((char*)rmr_header.meid,gnblist[i].c_str());
 
  	 mdclog_write(MDCLOG_INFO,"Sending subscription in file= %s, line=%d for MEID %s",__FILE__,__LINE__, meid);
-     auto transmitter = std::bind(&XappRmr::xapp_rmr_send,rmr_ref, &rmr_header, (void*)data);
+     auto transmitter = std::bind(&XappRmr::xapp_rmr_send,rmr_ref, &rmr_header, (void*)buf );//(void*)data);
 
-     int res = subhandler_ref->manage_subscription_request(meid, transmitter);
-     if(res){
+     int result = subhandler_ref->manage_subscription_request(meid, transmitter);
+     if(result){
      	 mdclog_write(MDCLOG_INFO,"Subscription SUCCESSFUL in file= %s, line=%d for MEID %s",__FILE__,__LINE__, meid);
 
      }
