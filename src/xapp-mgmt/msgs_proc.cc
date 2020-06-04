@@ -105,9 +105,10 @@ bool  XappMsgHandler::a1_policy_handler(char * message, int *message_len, a1_pol
     mdclog_write(MDCLOG_ERR, "Error : %s, %d:: Could not extract policy type id from %s\n", __FILE__, __LINE__, message);
     return false;
   }
-  helper.policy_type_id = ref2->GetString();
+   //helper.policy_type_id = ref2->GetString();
+    helper.policy_type_id = to_string(ref2->GetInt());
 
-  // Extract policy instance id
+    // Extract policy instance id
     rapidjson::Pointer temp("/policy_instance_id");
     rapidjson::Value * ref = temp.Get(doc);
     if (ref == NULL){

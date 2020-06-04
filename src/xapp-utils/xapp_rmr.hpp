@@ -51,8 +51,8 @@ typedef struct{
 	int32_t message_type;
 	int32_t state;
 	int32_t payload_length;
-	unsigned char sid[RMR_MAX_SID]; //sender ID for return to sender needs.(ACKS required)[RMR_MAX_SID]
-	unsigned char src[RMR_MAX_SRC]; //name of the sender (source)[RMR_MAX_SRC]
+	unsigned char sid[RMR_MAX_SID]; //Subscription ID.
+	unsigned char src[RMR_MAX_SRC]; //Xapp Name
 	unsigned char meid[RMR_MAX_MEID]={};
 
 }  xapp_rmr_header;
@@ -78,8 +78,6 @@ public:
 	template <class MessageProcessor>
 	void xapp_rmr_receive(MessageProcessor&&, XappRmr *parent);
 
-	template <class MessageProcessor>
-	void xapp_test_receiver(MessageProcessor&&, XappRmr *parent);
 	bool xapp_rmr_send(xapp_rmr_header*, void*);
 
 	bool rmr_header(xapp_rmr_header*);
@@ -138,8 +136,8 @@ void XappRmr::xapp_rmr_receive(MsgHandler&& msgproc, XappRmr *parent){
 			msgproc(this->_xapp_received_buff, resend);
 
 			if(*resend){
-				//mdclog_write(MDCLOG_INFO,"RMR Return to Sender Message of Type: %d",this->_xapp_received_buff->mtype);
-				//mdclog_write(MDCLOG_INFO,"RMR Return to Sender Message: %s",(char*)this->_xapp_received_buff->payload);
+				mdclog_write(MDCLOG_INFO,"RMR Return to Sender Message of Type: %d",this->_xapp_received_buff->mtype);
+				mdclog_write(MDCLOG_INFO,"RMR Return to Sender Message: %s",(char*)this->_xapp_received_buff->payload);
 				rmr_rts_msg(rmr_context, this->_xapp_received_buff );
 				sleep(1);
 				*resend = false;

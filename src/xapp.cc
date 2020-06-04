@@ -189,7 +189,7 @@ void Xapp::startup_get_policies(void){
 
   int policy_id = HELLOWORLD_POLICY_ID;
 
-  std::string policy_query = "{\"policy_id\":" + std::to_string(policy_id) + "}";
+  std::string policy_query = "{\"policy_type_id\":" + std::to_string(policy_id) + "}";
   unsigned char * message = (unsigned char *)calloc(policy_query.length(), sizeof(unsigned char));
   memcpy(message, policy_query.c_str(),  policy_query.length());
   xapp_rmr_header header;

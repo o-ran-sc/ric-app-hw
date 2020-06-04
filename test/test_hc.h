@@ -70,7 +70,8 @@ TEST(Xapp, RMRHealthCheck){
 TEST(Xapp, A1HealthCheck){
 
 	//Read the json file and send it using rmr.
-	string json = "{\"policy_type_id\": \"1\",\"policy_instance_id\":\"3d2157af-6a8f-4a7c-810f-38c2f824bf12\",\"operation\": \"CREATE\"}";
+	//string json = "{\"policy_type_id\": \"1\",\"policy_instance_id\":\"3d2157af-6a8f-4a7c-810f-38c2f824bf12\",\"operation\": \"CREATE\"}";
+	string json = "{\"operation\": \"CREATE\", \"policy_type_id\": 1, \"policy_instance_id\": \"hwpolicy321\", \"payload\": {\"threshold\": 5}}";
 	int n = json.length();
 	char strMsg[n + 1];
 	strcpy(strMsg, json.c_str());
