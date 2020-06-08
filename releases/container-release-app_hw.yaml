@@ -1,11 +1,11 @@
 ---
 distribution_type: container
-container_release_tag: 1.0.4
+container_release_tag: 1.0.5
 container_pull_registry: nexus3.o-ran-sc.org:10004
 container_push_registry: nexus3.o-ran-sc.org:10002
 project: ric-app/hw
-ref: 1c16c31f76ebc58d1385201129fb40bd034e48bc
+ref: 0a552cab842664d6e06495ff47b656551449a21f
 containers:
     - name: ric-app-hw
-      version: 1.0.4
+      version: 1.0.5
 
