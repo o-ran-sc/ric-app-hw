@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "69e8634e_3314d13b",
+        "filename": "releases/container-release-app_hw.yaml",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000037
+      },
+      "writtenOn": "2020-06-08T16:14:53Z",
+      "side": 1,
+      "message": "You need to change the commit id to be the ID of the most recent commit.",
+      "revId": "c9caac9c0fe3670e05950d056420ff385ea785cb",
+      "serverId": "84e4e190-e623-4c37-9eda-58b1937c1b53",
+      "unresolved": true
+    }
+  ]
+}
