@@ -31,7 +31,7 @@
 #include <cstdlib>
 #include <mdclog/mdclog.h>
 
-#define DEFAULT_XAPP_NAME "HW-Xapp"
+#define DEFAULT_XAPP_NAME "hwxapp"
 #define DEFAULT_PORT "4560"
 #define DEFAULT_MSG_MAX_BUFFER "2072"
 #define DEFAULT_THREADS "1"
