@@ -175,7 +175,10 @@ void XappMsgHandler::operator()(rmr_mbuf_t *message, bool *resend){
 				break;
 
 	case A1_POLICY_REQ:
+
+		    mdclog_write(MDCLOG_INFO, "In Message Handler: Received A1_POLICY_REQ.");
 			helper.handler_id = xapp_id;
+
 			res = a1_policy_handler((char*)message->payload, &message->len, helper);
 			if(res){
 				message->mtype = A1_POLICY_RESP;        // if we're here we are running and all is ok

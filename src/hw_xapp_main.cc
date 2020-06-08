@@ -75,22 +75,13 @@ int main(int argc, char *argv[]){
 
 	//start listener threads and register message handlers.
 	int num_threads = std::stoi(config[XappSettings::SettingName::THREADS]);
-	bool sub_required = true;
-	for(int j=0; j < num_threads; j++) {
-		std::unique_ptr<XappMsgHandler> mp_handler;
-		if(sub_required)
-			mp_handler = std::make_unique<XappMsgHandler>(config[XappSettings::SettingName::XAPP_ID], std::ref(*sub_handler));
-		else
-			mp_handler = std::make_unique<XappMsgHandler>(config[XappSettings::SettingName::XAPP_ID]);
-
-		hw_xapp->register_handler(std::ref(*mp_handler));
-	}
-
 	mdclog_write(MDCLOG_INFO, "Starting Listener Threads. Number of Workers = %d", num_threads);
 
-	hw_xapp->Run();
+	std::unique_ptr<XappMsgHandler> mp_handler = std::make_unique<XappMsgHandler>(config[XappSettings::SettingName::XAPP_ID]);
+	hw_xapp->start_xapp_receiver(std::ref(*mp_handler));
 
-	//Delete all subscriptions if any based on Xapp Mode.
+	sleep(1);
+
 	//xapp->shutdown();
 
  	while(1){
