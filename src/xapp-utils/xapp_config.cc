@@ -119,7 +119,7 @@ void XappSettings::loadEnvVarSettings(){
 		  theSettings[XAPP_NAME].assign(env_xname);
 		  mdclog_write(MDCLOG_INFO,"Xapp Name set to %s from environment variable", theSettings[XAPP_NAME].c_str());
 	  }
-	  if (const char *env_xid = std::getenv("XAPP_ID")){
+	  if (const char *env_xid = std::getenv("XAPP_NAME")){
 		   theSettings[XAPP_ID].assign(env_xid);
 		   mdclog_write(MDCLOG_INFO,"Xapp ID set to %s from environment variable", theSettings[XAPP_ID].c_str());
 	  }
