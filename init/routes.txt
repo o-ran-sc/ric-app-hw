@@ -1,13 +1,5 @@
 newrt|start
-rte|100|127.0.0.1:4560
-rte|101|127.0.0.1:38000
-rte|20010|127.0.0.1:4560
-rte|20011|127.0.0.1:38000
-rte|20012|127.0.0.1:4560
-rte|12010|127.0.0.1:38000
-rte|12011|127.0.0.1:4560
-rte|12012|127.0.0.1:4560
-rte|12020|127.0.0.1:38000
-rte|12021|127.0.0.1:4560
-rte|12022|127.0.0.1:4560
+rte|20011|service-ricplt-a1mediator-rmr.ricplt:4562
+rte|20012|service-ricplt-a1mediator-rmr.ricplt:4562
+rte|12010|service-ricplt-e2term-rmr-alpha.ricplt:38000
 newrt|end
