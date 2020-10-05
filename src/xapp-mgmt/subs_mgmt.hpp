@@ -33,6 +33,7 @@
 #include <unordered_map>
 #include <chrono>
 #include <tuple>
+#include <string>
 
 #include "../xapp-asn/e2ap/subscription_delete_request.hpp"
 #include "../xapp-asn/e2ap/subscription_delete_response.hpp"
@@ -92,7 +93,7 @@ typedef enum {
     request_duplicate
 }Subscription_Status_Types;
 
-using transaction_identifier = unsigned char*;
+using transaction_identifier = std::string;
 using transaction_status = Subscription_Status_Types;
 
 class SubscriptionHandler {
@@ -176,10 +177,10 @@ int SubscriptionHandler::manage_subscription_request(transaction_identifier rmr_
   if (!flg){
     // clear state
     delete_request_entry(rmr_trans_id);
-    mdclog_write(MDCLOG_ERR, "%s, %d :: Error transmitting subscription request %s", __FILE__, __LINE__, rmr_trans_id );
+    mdclog_write(MDCLOG_ERR, "%s, %d :: Error transmitting subscription request %s", __FILE__, __LINE__, rmr_trans_id.c_str() );
     return SUBSCR_ERR_TX;
   } else {
-	  mdclog_write(MDCLOG_INFO, "%s, %d :: Transmitted subscription request for trans_id %s", __FILE__, __LINE__, rmr_trans_id );
+	  mdclog_write(MDCLOG_INFO, "%s, %d :: Transmitted subscription request for trans_id %s", __FILE__, __LINE__, rmr_trans_id.c_str() );
 	  add_transmitter_entry(rmr_trans_id, tx);
 
   }
@@ -198,7 +199,7 @@ int SubscriptionHandler::manage_subscription_request(transaction_identifier rmr_
 	  int status = get_request_status(rmr_trans_id);
 
 	  if (status == request_success){
-		  mdclog_write(MDCLOG_INFO, "Successfully subscribed for request for trans_id %s", rmr_trans_id);
+		  mdclog_write(MDCLOG_INFO, "Successfully subscribed for request for trans_id %s", rmr_trans_id.c_str());
 		  res = SUBSCR_SUCCESS;
 		  break;
 	  }
@@ -210,15 +211,15 @@ int SubscriptionHandler::manage_subscription_request(transaction_identifier rmr_
 
 		  if ( f > _time_out){
 
-			  mdclog_write(MDCLOG_ERR, "%s, %d:: Subscription request with transaction id %s timed out waiting for response ", __FILE__, __LINE__, rmr_trans_id);
+			  mdclog_write(MDCLOG_ERR, "%s, %d:: Subscription request with transaction id %s timed out waiting for response ", __FILE__, __LINE__, rmr_trans_id.c_str());
 
-			  //res = SUBSCR_ERR_TIMEOUT;
+			  res = SUBSCR_ERR_TIMEOUT;
 			  //sunny side scenario. assuming subscription response is received.
-			  res = SUBSCR_SUCCESS;
+			  //res = SUBSCR_SUCCESS;
 			  break;
 		  }
 		  else{
-			  	 mdclog_write(MDCLOG_INFO, "Subscription request with transaction id %s Waiting for response....", rmr_trans_id);
+			  	 mdclog_write(MDCLOG_INFO, "Subscription request with transaction id %s Waiting for response....", rmr_trans_id.c_str());
 			  	 continue;
 		  }
 

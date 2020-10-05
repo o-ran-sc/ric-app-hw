@@ -176,10 +176,12 @@ void Xapp::startup_subscribe_requests(void ){
  	 mdclog_write(MDCLOG_INFO,"Sending subscription in file= %s, line=%d for MEID %s",__FILE__,__LINE__, meid);
      auto transmitter = std::bind(&XappRmr::xapp_rmr_send,rmr_ref, &rmr_header, (void*)buf );//(void*)data);
 
-     int result = subhandler_ref->manage_subscription_request(meid, transmitter);
-     if(result){
-     	 mdclog_write(MDCLOG_INFO,"Subscription SUCCESSFUL in file= %s, line=%d for MEID %s",__FILE__,__LINE__, meid);
-
+     int result = subhandler_ref->manage_subscription_request(gnblist[i], transmitter);
+     if(result==SUBSCR_SUCCESS){
+     	mdclog_write(MDCLOG_INFO,"Subscription SUCCESSFUL in file= %s, line=%d for MEID %s",__FILE__,__LINE__, meid);
+     }
+     else {
+	 	mdclog_write(MDCLOG_ERR,"Subscription FAILED in file= %s, line=%d for MEID %s",__FILE__,__LINE__, meid);
      }
    }
 
@@ -215,7 +217,7 @@ void Xapp::set_rnib_gnblist(void) {
 
 
 	    Document doc;
-	    ParseResult parseJson = doc.Parse((char*)result);
+	    ParseResult parseJson = doc.Parse<kParseStopWhenDoneFlag>((char*)result);
 	    if (!parseJson) {
 	    	std::cerr << "JSON parse error: %s (%u)", GetParseErrorFunc(parseJson.Code());
 	    	return;

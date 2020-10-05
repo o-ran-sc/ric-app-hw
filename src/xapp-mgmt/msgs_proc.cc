@@ -83,7 +83,7 @@ bool XappMsgHandler::decode_subscription_response(unsigned char* data_buf, size_
 bool  XappMsgHandler::a1_policy_handler(char * message, int *message_len, a1_policy_helper &helper){
 
   rapidjson::Document doc;
-  if (doc.Parse(message).HasParseError()){
+  if (doc.Parse<kParseStopWhenDoneFlag>(message).HasParseError()){
     mdclog_write(MDCLOG_ERR, "Error: %s, %d :: Could not decode A1 JSON message %s\n", __FILE__, __LINE__, message);
     return false;
   }
@@ -151,6 +151,7 @@ void XappMsgHandler::operator()(rmr_mbuf_t *message, bool *resend){
 	}
 	a1_policy_helper helper;
 	bool res=false;
+	std::string str_meid;
 	switch(message->mtype){
 		//need to fix the health check.
 		case (RIC_HEALTH_CHECK_REQ):
@@ -163,15 +164,24 @@ void XappMsgHandler::operator()(rmr_mbuf_t *message, bool *resend){
 		case (RIC_SUB_RESP):
         		mdclog_write(MDCLOG_INFO, "Received subscription message of type = %d", message->mtype);
 				unsigned char *me_id;
-				rmr_get_meid(message, me_id);
+				if( (me_id = (unsigned char *) malloc( sizeof( unsigned char ) * RMR_MAX_MEID )) == NULL ) {
+					mdclog_write(MDCLOG_ERR, "Error :  %s, %d : malloc failed for me_id", __FILE__, __LINE__);
+					me_id = rmr_get_meid(message, NULL);
+				} else {
+					rmr_get_meid(message, me_id);
+				}
 				mdclog_write(MDCLOG_INFO,"RMR Received MEID: %s",me_id);
-
+				str_meid.insert(0,(char*)me_id);
 				if(_ref_sub_handler !=NULL){
-					_ref_sub_handler->manage_subscription_response(message->mtype, me_id);
+					_ref_sub_handler->manage_subscription_response(message->mtype, str_meid);
 				} else {
 					mdclog_write(MDCLOG_ERR, " Error :: %s, %d : Subscription handler not assigned in message processor !", __FILE__, __LINE__);
 				}
 				*resend = false;
+				if (me_id != NULL) {
+					mdclog_write(MDCLOG_INFO, "Free RMR Received MEID memory: %s(0x%x)", me_id, me_id);
+					free(me_id);
+				}
 				break;
 
 	case A1_POLICY_REQ:

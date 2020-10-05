@@ -67,10 +67,10 @@ bool SubscriptionHandler::delete_request_entry(transaction_identifier id){
 
   if (search != status_table.end()){
     status_table.erase(search);
-    mdclog_write(MDCLOG_INFO,"Entry for Transaction ID deleted: %d",id);
+    mdclog_write(MDCLOG_INFO,"Entry for Transaction ID deleted: %s",id.c_str());
     return true;
   }
-  mdclog_write(MDCLOG_INFO,"Entry not found in SubscriptionHandler for Transaction ID: %d",id);
+  mdclog_write(MDCLOG_INFO,"Entry not found in SubscriptionHandler for Transaction ID: %s",id.c_str());
 
   return false;
 };
