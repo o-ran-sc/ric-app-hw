@@ -60,5 +60,37 @@ TEST(SUBSCRIPTION, Request){
 
 }
 
+//create a MOck e2term
+TEST (MOCK, E2TERM){
+
+	 const char* meid = "test1";
+	 const char* sub_id = "sub1";
+	 //Send the Subscription Response.
+	 xapp_rmr_header hdr;
+	 hdr.message_type = RIC_SUB_RESP;
+	 clock_gettime(CLOCK_REALTIME, &(hdr.ts));
+	 const char* strMsg = "Subscription Response for MEID: test1";
+	 hdr.payload_length = strlen(strMsg);
+	 strcpy((char*)hdr.meid, meid);
+	 strcpy((char*)hdr.sid,sub_id);
+	 int total_num_msgs = 2;
+	 int num_attempts = 10;
+
+	 std::unique_ptr<XappRmr> rmr;
+	 rmr = std::make_unique<XappRmr>("4591",num_attempts);
+	 rmr->xapp_rmr_init(true);
+
+	 XappSettings config;
+
+	 std::unique_ptr<Xapp> hw_xapp = std::make_unique<Xapp>(std::ref(config),std::ref(*rmr));
+	 while(1){
+		 bool res_msg = rmr->xapp_rmr_send(&hdr,(void*)strMsg);
+		 if(res_msg){
+			 mdclog_write(MDCLOG_INFO, "Message Sent Successfully");
+			 break;
+		 }
+		 sleep(10);
+	 }
+}
 
 #endif /* TEST_TEST_SUBS_H_ */
