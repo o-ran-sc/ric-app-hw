@@ -163,8 +163,8 @@ void Xapp::startup_subscribe_requests(void ){
 	 din.set_event_def(event_def.c_str(), event_def.length());
 
 	 std::string act_def = "HelloWorld Action Definition";
-
-	 din.add_action(1,1,(void*)act_def.c_str(), act_def.length(), 0);
+	 //valid action type 0 in RICactions-ToBeSetup-List in Submgr
+	 din.add_action(1,0,(void*)act_def.c_str(), act_def.length(), 0);
 
 	 res = sub_req.encode_e2ap_subscription(&buf[0], &buf_size, din);
 

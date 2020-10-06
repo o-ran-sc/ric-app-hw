@@ -151,7 +151,6 @@ void XappMsgHandler::operator()(rmr_mbuf_t *message, bool *resend){
 	}
 	a1_policy_helper helper;
 	bool res=false;
-	std::string str_meid;
 	switch(message->mtype){
 		//need to fix the health check.
 		case (RIC_HEALTH_CHECK_REQ):
@@ -170,10 +169,14 @@ void XappMsgHandler::operator()(rmr_mbuf_t *message, bool *resend){
 				} else {
 					rmr_get_meid(message, me_id);
 				}
+				if(me_id == NULL){
+					mdclog_write(MDCLOG_ERR, " Error :: %s, %d : rmr_get_meid failed me_id is NULL", __FILE__, __LINE__);
+					free(me_id);
+					break;
+				}
 				mdclog_write(MDCLOG_INFO,"RMR Received MEID: %s",me_id);
-				str_meid.insert(0,(char*)me_id);
 				if(_ref_sub_handler !=NULL){
-					_ref_sub_handler->manage_subscription_response(message->mtype, str_meid);
+					_ref_sub_handler->manage_subscription_response(message->mtype, reinterpret_cast< char const* >(me_id));
 				} else {
 					mdclog_write(MDCLOG_ERR, " Error :: %s, %d : Subscription handler not assigned in message processor !", __FILE__, __LINE__);
 				}
