@@ -17,20 +17,22 @@
 ==================================================================================
 */
 /*
- * e2sm_control.cc
+ * e2sm_subscription.hpp
  *
- *  Created on: Apr 30, 2020
- *      Author: Shraboni Jana
+ *  Created on: Jun 30, 2020
+ *      Author: sjana
  */
-/* Classes to handle E2 service model based on e2sm-HelloWorld-v001.asn */
-#ifndef E2SM_
-#define E2SM_
+
+#ifndef XAPP_ASN_REFACTOR_E2SM_SUBSCRIPTION_HPP_
+#define XAPP_ASN_REFACTOR_E2SM_SUBSCRIPTION_HPP_
 
 
-#include <sstream>
-#include <e2sm_helpers.hpp>
-#include <mdclog/mdclog.h>
+#include <errno.h>
+#include <iostream>
 #include <vector>
+#include <sstream>
+#include <memory>
+#include <mdclog/mdclog.h>
 
 #include <E2SM-HelloWorld-EventTriggerDefinition.h>
 #include <E2SM-HelloWorld-ActionDefinition.h>
@@ -38,37 +40,86 @@
 #include <E2SM-HelloWorld-ActionDefinition-Format1.h>
 #include <HW-TriggerNature.h>
 #include <RANparameter-Item.h>
+#include <ProtocolIE-Field.h>
 
-/* builder class for E2SM event trigger definition */
-
-class e2sm_subscription {
+class HWEventTriggerDefinition {
 public:
-	e2sm_subscription(void);
-  ~e2sm_subscription(void);
+   HWEventTriggerDefinition(void);
+  ~HWEventTriggerDefinition(void);
 
-  bool set_fields(E2SM_HelloWorld_EventTriggerDefinition_t *, e2sm_subscription_helper &);
-  bool set_fields(E2SM_HelloWorld_ActionDefinition_t *, e2sm_subscription_helper &);
-
-  bool encode_event_trigger(unsigned char *, size_t *, e2sm_subscription_helper &);
-  bool encode_action_defn(unsigned char*, size_t *, e2sm_subscription_helper &);
-
-
-  std::string  get_error (void) const {return error_string ;};
+  bool encode(unsigned char *, size_t *);
+  std::string  get_error (void) const {return _error_string ;};
+  int get_triggerNature(){return this->_triggerNature;};
+  HWEventTriggerDefinition& set_triggerNature(int trigger){ this->_triggerNature = trigger; return *this;};
 
 private:
 
-  E2SM_HelloWorld_EventTriggerDefinition_t * event_trigger; // used for encoding
-  E2SM_HelloWorld_ActionDefinition_t* action_defn;
-  E2SM_HelloWorld_EventTriggerDefinition_Format1_t event_fmt1;
-  E2SM_HelloWorld_ActionDefinition_Format1_t actn_fmt1;
-  RANparameter_Item_t *ran_param;
+  E2SM_HelloWorld_EventTriggerDefinition_t * _event_trigger; // used for encoding
+  E2SM_HelloWorld_EventTriggerDefinition_Format1_t _event_fmt1;
+  int _triggerNature;
 
-
-  size_t errbuf_len;
-  char errbuf[128];
-  std::string error_string;
+  size_t _errbuf_len = 128;
+  char _errbuf[128];
+  std::string _error_string;
 };
 
 
+class HWActionDefinition {
 
-#endif
+public:
+  HWActionDefinition(void);
+  ~HWActionDefinition(void);
+  class RANParamIEs{
+
+  private:
+  		  long int _param_id;
+  	      unsigned char _param_name[20];
+  	      size_t _param_name_size;
+  	      int _param_test;
+  	      unsigned char _param_value[20];
+  	      size_t _param_value_size;
+  public:
+  		  RANParamIEs(void):_param_id(0),_param_name_size(0), _param_test(0),_param_value_size(0){};
+  		  RANParamIEs& set_param_id(int param_id) {_param_id = param_id; return *this;};
+  		  RANParamIEs& set_param_name(std::string param_name) { _param_name_size = strlen(param_name.c_str());
+  		  	  	  	  	  	  	  	  	  	  	  	  	  	   strncpy((char*)_param_name,param_name.c_str(),_param_name_size); return *this;};
+  		  RANParamIEs& set_param_test(int param_test) {_param_test = param_test; return *this;};
+  		  RANParamIEs& set_param_value(std::string param_value) {_param_value_size = strlen(param_value.c_str());
+  		  	  	  	  	  	  	  	  	  	  	  	  	  	  	 strncpy((char*)_param_value,param_value.c_str(),_param_value_size); return *this;};
+
+  		  int get_param_id(){return this->_param_id;};
+  		  int get_param_test(){return this->_param_test;};
+  		  unsigned char* get_param_name(){return this->_param_name;};
+  		  int get_param_name_size(){return this->_param_name_size;};
+  		  unsigned char* get_param_value(){return this->_param_value;};
+  		  int get_param_value_size(){return this->_param_value_size;};
+
+
+  };
+  std::vector<RANParamIEs> * get_list() const {return _param_list.get();};
+  int get_list_count() const {return _count_list;};
+  bool encode(unsigned char *, size_t *);
+  std::string  get_error (void) const {return _error_string ;};
+  void add(RANParamIEs ie_obj){
+	  _param_list.get()->push_back(ie_obj);
+  	  _count_list ++;
+  }
+
+private:
+  std::unique_ptr<std::vector<RANParamIEs>> _param_list;
+  int _count_list;
+  E2SM_HelloWorld_ActionDefinition_t* _action_defn;
+  E2SM_HelloWorld_ActionDefinition_Format1_t _action_fmt1;
+  RANparameter_Item_t* _ranparam_ie;
+
+  size_t _errbuf_len = 128;
+  char _errbuf[128];
+  std::string _error_string;
+
+  bool setfields(E2SM_HelloWorld_ActionDefinition_t *);
+
+
+};
+
+
+#endif /* XAPP_ASN_REFACTOR_E2SM_SUBSCRIPTION_HPP_ */

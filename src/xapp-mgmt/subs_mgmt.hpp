@@ -37,11 +37,9 @@
 #include <chrono>
 #include <tuple>
 #include <rmr/RIC_message_types.h>
-
-#include "subscription_delete_request.hpp"
-#include "subscription_delete_response.hpp"
-#include "subscription_request.hpp"
-#include "subscription_response.hpp"
+#include "e2ap_action.hpp"
+#include "e2ap_subscription_request.hpp"
+#include "e2sm_subscription.hpp"
 
 #define SUBSCR_SUCCESS 1
 #define SUBSCR_ERR_TX -1

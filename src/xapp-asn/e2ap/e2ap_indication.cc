@@ -23,7 +23,7 @@
  *      Author: sjana, Ashwin Sridharan
  */
 
-#include "e2ap_indication.hpp"
+/*#include "e2ap_indication.hpp"
 
 // Set up memory allocations for each IE for encoding
 // We are responsible for memory management for each IE for encoding
@@ -281,3 +281,4 @@ bool ric_indication:: get_fields(InitiatingMessage_t * init_msg,  ric_indication
 InitiatingMessage_t * ric_indication::get_message(void)  {
     return initMsg;
 }
+*/

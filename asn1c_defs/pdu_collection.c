@@ -11,20 +11,18 @@ extern struct asn_TYPE_descriptor_s asn_DEF_E2SM_HelloWorld_IndicationHeader;
 extern struct asn_TYPE_descriptor_s asn_DEF_E2SM_HelloWorld_IndicationMessage;
 extern struct asn_TYPE_descriptor_s asn_DEF_E2SM_HelloWorld_ControlHeader;
 extern struct asn_TYPE_descriptor_s asn_DEF_E2SM_HelloWorld_ControlMessage;
-extern struct asn_TYPE_descriptor_s asn_DEF_HW_ControlCommand;
 
 
 struct asn_TYPE_descriptor_s *asn_pdu_collection[] = {
-	/* From module E2AP-PDU-Descriptions in /home/sjana/ASN-Defns/e2ap-oran-wg3-v01.00.asn */
+	/* From module E2AP-PDU-Descriptions in e2ap-oran-wg3-v01.00.asn */
 	&asn_DEF_E2AP_PDU,	
-	/* From module E2SM-HelloWorld-IEs in /home/sjana/ASN-Defns/e2sm-HelloWorld-v002.asn */
+	/* From module E2SM-HelloWorld-IEs in e2sm-HelloWorld-v001.asn */
 	&asn_DEF_E2SM_HelloWorld_EventTriggerDefinition,	
 	&asn_DEF_E2SM_HelloWorld_ActionDefinition,	
 	&asn_DEF_E2SM_HelloWorld_IndicationHeader,	
 	&asn_DEF_E2SM_HelloWorld_IndicationMessage,	
 	&asn_DEF_E2SM_HelloWorld_ControlHeader,	
 	&asn_DEF_E2SM_HelloWorld_ControlMessage,	
-	&asn_DEF_HW_ControlCommand,	
 	0
 };
 

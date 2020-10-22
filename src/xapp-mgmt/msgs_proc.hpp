@@ -31,16 +31,6 @@
 #include <mdclog/mdclog.h>
 
 #include "a1_helper.hpp"
-#include "e2ap_control.hpp"
-#include "e2ap_control_response.hpp"
-#include "e2ap_indication.hpp"
-#include "subscription_delete_request.hpp"
-#include "subscription_delete_response.hpp"
-#include "subscription_helper.hpp"
-#include "subscription_request.hpp"
-#include "subscription_request.hpp"
-#include "subscription_response.hpp"
-#include "e2sm_subscription.hpp"
 #include "subs_mgmt.hpp"
 
 #define MAX_RMR_RECV_SIZE 2<<15

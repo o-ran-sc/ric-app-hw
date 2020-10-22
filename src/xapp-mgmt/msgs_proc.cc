@@ -25,27 +25,7 @@
 
 #include "msgs_proc.hpp"
 
-
-bool XappMsgHandler::encode_subscription_delete_request(unsigned char* buffer, size_t *buf_len){
-
-	subscription_helper sub_helper;
-	sub_helper.set_request(0); // requirement of subscription manager ... ?
-	sub_helper.set_function_id(0);
-
-	subscription_delete e2ap_sub_req_del;
-
-	  // generate the delete request pdu
-
-	  bool res = e2ap_sub_req_del.encode_e2ap_subscription(&buffer[0], buf_len, sub_helper);
-	  if(! res){
-	    mdclog_write(MDCLOG_ERR, "%s, %d: Error encoding subscription delete request pdu. Reason = %s", __FILE__, __LINE__, e2ap_sub_req_del.get_error().c_str());
-	    return false;
-	  }
-
-	return true;
-
-}
-
+/*
 bool XappMsgHandler::decode_subscription_response(unsigned char* data_buf, size_t data_size){
 
 	subscription_helper subhelper;
@@ -78,7 +58,7 @@ bool XappMsgHandler::decode_subscription_response(unsigned char* data_buf, size_
 	ASN_STRUCT_FREE(asn_DEF_E2AP_PDU, e2pdu);
 	return res;
 
-}
+}*/
 
 bool  XappMsgHandler::a1_policy_handler(char * message, int *message_len, a1_policy_helper &helper){
 

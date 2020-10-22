@@ -23,7 +23,7 @@
  *      Author: sjana, Ashwin Sridharan
  */
 
-#include "e2ap_control.hpp"
+/*#include "e2ap_control.hpp"
 
 // Set up memory allocations for each IE for encoding
 // We are responsible for memory management for each IE for encoding
@@ -264,3 +264,4 @@ bool ric_control_request:: get_fields(InitiatingMessage_t * init_msg,  ric_contr
 InitiatingMessage_t * ric_control_request::get_message(void)  {
     return initMsg;
 }
+*/
