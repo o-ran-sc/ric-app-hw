@@ -13,7 +13,7 @@ extern "C" {
 #define maxnoofErrors (256)
 #define maxofRANfunctionID (256)
 #define maxofRICactionID (16)
-#define maxofRANParameters (255)
+#define maxofRANParameters (100)
 
 
 #ifdef __cplusplus
