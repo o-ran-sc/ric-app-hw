@@ -126,8 +126,9 @@ void Xapp::startup_subscribe_requests(void ){
 
    mdclog_write(MDCLOG_INFO,"Preparing to send subscription in file= %s, line=%d",__FILE__,__LINE__);
 
-   auto gnblist = get_rnib_gnblist();
+   std::string sub_id = "1";
 
+   auto gnblist = get_rnib_gnblist();
    int sz = gnblist.size();
 
    if(sz <= 0)
@@ -142,35 +143,36 @@ void Xapp::startup_subscribe_requests(void ){
  	// strncpy((char *)data,strMsg,strlen(strMsg));
  	// data_size = strlen(strMsg);
 
-	 subscription_helper  din;
-	 subscription_helper  dout;
-
-	 subscription_request sub_req;
-	 subscription_request sub_recv;
-
-	 unsigned char buf[BUFFER_SIZE];
-	 size_t buf_size = BUFFER_SIZE;
-	 bool res;
+	 unsigned char buf[1024];
+	 size_t buf_size = 1024;
 
 
-	 //Random Data  for request
-	 int request_id = 1;
-	 int function_id = 0;
-	 std::string event_def = "HelloWorld Event Definition";
+	 HWEventTriggerDefinition eventObj;
+	 eventObj.set_triggerNature(0);
 
-	 din.set_request(request_id);
-	 din.set_function_id(function_id);
-	 din.set_event_def(event_def.c_str(), event_def.length());
+	 //creating Action Definition
+	 HWActionDefinition e2sm_actdefn1;
+	 e2sm_actdefn1.add(HWActionDefinition::RANParamIEs().set_param_id(1).set_param_name("ENodeBID").set_param_test(1).set_param_value("SR123"));
 
-	 std::string act_def = "HelloWorld Action Definition";
+	 //first Action Object
+	 E2APAction<HWActionDefinition> actionObj;
+	 actionObj.add(E2APAction<HWActionDefinition>::ActionIEs().set_ricActionID(1).set_ricActionType(1).set_ricActionDefinition(e2sm_actdefn1));
 
-	 din.add_action(1,1,(void*)act_def.c_str(), act_def.length(), 0);
+	 E2APSubscriptionRequest<HWEventTriggerDefinition, HWActionDefinition> requestObj(E2APSubscriptionRequest<HWEventTriggerDefinition, HWActionDefinition>::SubscriptionRequestIEs().set_ranFunctionID(1).set_ricInstanceID(1).set_ricRequestorID(3).set_ricAction_ToBeSetup_List(actionObj).set_ricEventTriggerDefinition(eventObj));
 
-	 res = sub_req.encode_e2ap_subscription(&buf[0], &buf_size, din);
+	 bool res = requestObj.encode(&buf[0], &buf_size);
+	 if(!res)
+		  mdclog_write(MDCLOG_ERR,"SubscriptionRequest ENCODING Error: %s",requestObj.get_error().c_str());
+	 else
+		  mdclog_write(MDCLOG_INFO,"SubscriptionRequest ENCODING SUCESS");
+
+
 
  	 xapp_rmr_header rmr_header;
  	 rmr_header.message_type = RIC_SUB_REQ;
  	 rmr_header.payload_length = buf_size; //data_size
+
+  	 strcpy((char*)rmr_header.sid,sub_id.c_str());
   	 strcpy((char*)rmr_header.meid,gnblist[i].c_str());
 
  	 mdclog_write(MDCLOG_INFO,"Sending subscription in file= %s, line=%d for MEID %s",__FILE__,__LINE__, meid);

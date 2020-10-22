@@ -17,7 +17,7 @@
 ==================================================================================
 */
 /*
- * e2sm_indication.cc
+ * HWIndicationMessage.cc
  *
  *  Created on: Apr, 2020
  *      Author: Shraboni Jana
@@ -26,68 +26,95 @@
 #include "e2sm_indication.hpp"
 
  //initialize
- e2sm_indication::e2sm_indication(void){
+ HWIndicationMessage::HWIndicationMessage(void){
 
-	memset(&head_fmt1, 0, sizeof(E2SM_HelloWorld_IndicationHeader_Format1_t));
+	memset(&_message_fmt1, 0, sizeof(E2SM_HelloWorld_IndicationMessage_Format1_t));
 
-	memset(&msg_fmt1, 0, sizeof(E2SM_HelloWorld_IndicationMessage_Format1_t));
-
-
-
-    indication_head = 0;
-    indication_head = ( E2SM_HelloWorld_IndicationHeader_t *)calloc(1, sizeof( E2SM_HelloWorld_IndicationHeader_t));
-    assert(indication_head != 0);
-
-    indication_msg = 0;
-    indication_msg = (E2SM_HelloWorld_IndicationMessage_t*)calloc(1, sizeof(E2SM_HelloWorld_IndicationMessage_t));
-    assert(indication_msg !=0);
-
-    errbuf_len = 128;
+	_message = 0;
+    _message = (E2SM_HelloWorld_IndicationMessage_t*)calloc(1, sizeof(E2SM_HelloWorld_IndicationMessage_t));
+    assert(_message !=0);
+    _hw_msg = 0;
+    _hw_msg_size = 0;
   };
 
- e2sm_indication::~e2sm_indication(void){
+ //initialize
+ HWIndicationMessage::HWIndicationMessage(unsigned char *buf, size_t *size, bool &status){
+
+	_message = 0;
+    _hw_msg = 0;
+    _hw_msg_size = 0;
+
+    status = this->decode(buf, size);
+
+ };
+
+ //initialize
+  HWIndicationHeader::HWIndicationHeader(void){
+
+ 	memset(&_header_fmt1, 0, sizeof(E2SM_HelloWorld_IndicationHeader_Format1_t));
+
+ 	_header = 0;
+     _header = ( E2SM_HelloWorld_IndicationHeader_t *)calloc(1, sizeof( E2SM_HelloWorld_IndicationHeader_t));
+     assert(_header != 0);
+
+     _hw_header = 0;
+   };
+
+  //initialize
+   HWIndicationHeader::HWIndicationHeader(unsigned char *buf, size_t *size, bool &status){
+
+  	_header = 0;
+  	_hw_header = 0;
+
+      status = this->decode(buf, size);
+
+   };
+
+
+ HWIndicationMessage::~HWIndicationMessage(void){
 
   mdclog_write(MDCLOG_DEBUG, "Freeing event trigger object memory");
-
-  indication_head->choice.indicationHeader_Format1 = 0;
-
-  indication_msg->choice.indicationMessage_Format1 = 0;
-
-  ASN_STRUCT_FREE(asn_DEF_E2SM_HelloWorld_IndicationHeader, indication_head);
-  ASN_STRUCT_FREE(asn_DEF_E2SM_HelloWorld_IndicationMessage, indication_msg);
+  _message->choice.indicationMessage_Format1 = 0;
+  ASN_STRUCT_FREE(asn_DEF_E2SM_HelloWorld_IndicationMessage, _message);
 
 
 };
+ HWIndicationHeader::~HWIndicationHeader(void){
 
-bool e2sm_indication::encode_indication_header(unsigned char *buf, size_t *size, e2sm_indication_helper &helper){
+   mdclog_write(MDCLOG_DEBUG, "Freeing event trigger object memory");
+   _header->choice.indicationHeader_Format1 = 0;
+   ASN_STRUCT_FREE(asn_DEF_E2SM_HelloWorld_IndicationHeader, _header);
+ };
 
-  ASN_STRUCT_RESET(asn_DEF_E2SM_HelloWorld_IndicationHeader, indication_head);
+bool HWIndicationHeader::encode(unsigned char *buf, size_t *size){
+
+  ASN_STRUCT_RESET(asn_DEF_E2SM_HelloWorld_IndicationHeader, _header);
 
   bool res;
-  res = set_fields(indication_head, helper);
+  res = setfields(_header);
   if (!res){
 
     return false;
   }
 
-  int ret_constr = asn_check_constraints(&asn_DEF_E2SM_HelloWorld_IndicationHeader, indication_head, errbuf, &errbuf_len);
+  int ret_constr = asn_check_constraints(&asn_DEF_E2SM_HelloWorld_IndicationHeader, _header, _errbuf, &_errbuf_len);
   if(ret_constr){
-    error_string.assign(&errbuf[0], errbuf_len);
+    _error_string.assign(&_errbuf[0], _errbuf_len);
     return false;
   }
 
-  xer_fprint(stdout, &asn_DEF_E2SM_HelloWorld_IndicationHeader, indication_head);
+  xer_fprint(stdout, &asn_DEF_E2SM_HelloWorld_IndicationHeader, _header);
 
-  asn_enc_rval_t retval = asn_encode_to_buffer(0, ATS_ALIGNED_BASIC_PER, &asn_DEF_E2SM_HelloWorld_IndicationHeader, indication_head, buf, *size);
+  asn_enc_rval_t retval = asn_encode_to_buffer(0, ATS_ALIGNED_BASIC_PER, &asn_DEF_E2SM_HelloWorld_IndicationHeader, _header, buf, *size);
 
   if(retval.encoded == -1){
-    error_string.assign(strerror(errno));
+    _error_string.assign(strerror(errno));
     return false;
   }
   else if (retval.encoded > *size){
     std::stringstream ss;
     ss  <<"Error encoding event trigger definition. Reason =  encoded pdu size " << retval.encoded << " exceeds buffer size " << *size << std::endl;
-    error_string = ss.str();
+    _error_string = ss.str();
     return false;
   }
   else{
@@ -97,33 +124,32 @@ bool e2sm_indication::encode_indication_header(unsigned char *buf, size_t *size,
   return true;
 }
 
-bool e2sm_indication::encode_indication_message(unsigned char *buf, size_t *size, e2sm_indication_helper &helper){
+bool HWIndicationMessage::encode(unsigned char *buf, size_t *size){
 
   bool res;
-  res = set_fields(indication_msg, helper);
+  res = setfields(_message);
   if (!res){
     return false;
   }
 
-
-  int ret_constr = asn_check_constraints(&asn_DEF_E2SM_HelloWorld_IndicationMessage, indication_msg, errbuf, &errbuf_len);
+  int ret_constr = asn_check_constraints(&asn_DEF_E2SM_HelloWorld_IndicationMessage, _message, _errbuf, &_errbuf_len);
   if(ret_constr){
-    error_string.assign(&errbuf[0], errbuf_len);
+    _error_string.assign(&_errbuf[0], _errbuf_len);
     return false;
   }
 
-  xer_fprint(stdout, &asn_DEF_E2SM_HelloWorld_IndicationMessage, indication_msg);
+  xer_fprint(stdout, &asn_DEF_E2SM_HelloWorld_IndicationMessage, _message);
 
-  asn_enc_rval_t retval = asn_encode_to_buffer(0, ATS_ALIGNED_BASIC_PER, &asn_DEF_E2SM_HelloWorld_IndicationMessage, indication_msg, buf, *size);
+  asn_enc_rval_t retval = asn_encode_to_buffer(0, ATS_ALIGNED_BASIC_PER, &asn_DEF_E2SM_HelloWorld_IndicationMessage, _message, buf, *size);
 
   if(retval.encoded == -1){
-    error_string.assign(strerror(errno));
+    _error_string.assign(strerror(errno));
     return false;
   }
   else if (retval.encoded > *size){
     std::stringstream ss;
     ss  <<"Error encoding action definition. Reason =  encoded pdu size " << retval.encoded << " exceeds buffer size " << *size << std::endl;
-    error_string = ss.str();
+    _error_string = ss.str();
     return false;
   }
   else{
@@ -133,59 +159,68 @@ bool e2sm_indication::encode_indication_message(unsigned char *buf, size_t *size
   return true;
 }
 
-bool e2sm_indication::set_fields(E2SM_HelloWorld_IndicationHeader_t * ref_indication_head, e2sm_indication_helper & helper){
+bool HWIndicationHeader::setfields(E2SM_HelloWorld_IndicationHeader_t * _header){
 
- if(ref_indication_head == 0){
-    error_string = "Invalid reference for Event Trigger Definition set fields";
+ if(_header == 0){
+    _error_string = "Invalid reference for Event Trigger Definition set fields";
     return false;
   }
 
-  ref_indication_head->present = E2SM_HelloWorld_IndicationHeader_PR_indicationHeader_Format1;
-
-  head_fmt1.indicationHeaderParam = helper.header;
-
-  ref_indication_head->choice.indicationHeader_Format1 = &head_fmt1;
+ _header->present = E2SM_HelloWorld_IndicationHeader_PR_indicationHeader_Format1;
+  _header_fmt1.indicationHeaderParam = this->get_hw_header();
+  _header->choice.indicationHeader_Format1 = &_header_fmt1;
 
   return true;
 };
 
-bool e2sm_indication::set_fields(E2SM_HelloWorld_IndicationMessage_t * ref_indication_msg, e2sm_indication_helper & helper){
+bool HWIndicationMessage::setfields(E2SM_HelloWorld_IndicationMessage_t * _message){
 
- if(ref_indication_msg == 0){
-    error_string = "Invalid reference for Event Action Definition set fields";
+ if(_message == 0){
+    _error_string = "Invalid reference for Event Action Definition set fields";
     return false;
   }
-  ref_indication_msg->present = E2SM_HelloWorld_IndicationMessage_PR_indicationMessage_Format1;
+  _message->present = E2SM_HelloWorld_IndicationMessage_PR_indicationMessage_Format1;
 
-  msg_fmt1.indicationMsgParam.buf = helper.message;
-  msg_fmt1.indicationMsgParam.size = helper.message_len;
-
-
-  ref_indication_msg->choice.indicationMessage_Format1 = &msg_fmt1;
-
+  _message_fmt1.indicationMsgParam.buf = this->get_hw_message();
+  _message_fmt1.indicationMsgParam.size = this->get_hw_message_size();
+  _message->choice.indicationMessage_Format1 = &_message_fmt1;
 
   return true;
 };
 
-bool e2sm_indication::get_fields(E2SM_HelloWorld_IndicationHeader_t * ref_indictaion_header, e2sm_indication_helper & helper){
+bool HWIndicationHeader::decode(unsigned char *buf, size_t *size){
+	asn_dec_rval_t dec_res  = asn_decode(0,ATS_ALIGNED_BASIC_PER, &asn_DEF_E2SM_HelloWorld_IndicationHeader, (void**)&(_header), buf, *size);
+	 if(dec_res.code != RC_OK){
+		 mdclog_write(MDCLOG_ERR, "Failed to decode: %s","HW-E2SM RIC Indication Header");
+		 return false;
+	 } else {
+		 mdclog_write(MDCLOG_INFO, "Successfully decoded: %s","HW-E2SM RIC Indication Header");
+	 }
 
-	if (ref_indictaion_header == 0){
-	    error_string = "Invalid reference for Indication Header get fields";
+	 if (_header == 0){
+	    _error_string = "Invalid reference for Indication Header get fields";
 	    return false;
 	  }
 
-	helper.header = ref_indictaion_header->choice.indicationHeader_Format1->indicationHeaderParam;
+	this->set_ricIndicationHeader(_header->choice.indicationHeader_Format1->indicationHeaderParam);
 	return true;
 }
 
-bool e2sm_indication::get_fields(E2SM_HelloWorld_IndicationMessage_t * ref_indication_message, e2sm_indication_helper & helper){
+bool HWIndicationMessage::decode(unsigned char *buf, size_t *size){
 
-	  if (ref_indication_message == 0){
-	  	    error_string = "Invalid reference for Indication Message get fields";
+	asn_dec_rval_t dec_res  = asn_decode(0,ATS_ALIGNED_BASIC_PER, &asn_DEF_E2SM_HelloWorld_IndicationMessage, (void**)&(_message), buf, *size);
+	if(dec_res.code != RC_OK){
+			 mdclog_write(MDCLOG_ERR, "Failed to decode: %s","HW-E2SM RIC Indication Message");
+			 return false;
+	} else {
+			 mdclog_write(MDCLOG_INFO, "Successfully decoded: %s","HW-E2SM RIC Indication Message");
+	}
+
+	  if (_message == 0){
+	  	    _error_string = "Invalid reference for Indication Message get fields";
 	  	    return false;
 	  	  }
-	  helper.message = ref_indication_message->choice.indicationMessage_Format1->indicationMsgParam.buf;
-	  helper.message_len = ref_indication_message->choice.indicationMessage_Format1->indicationMsgParam.size;
+	 // this->set_ricIndicationMessage(_message->choice.indicationMessage_Format1->indicationMsgParam.buf, _message->choice.indicationMessage_Format1->indicationMsgParam.size);
 
 	  return true;
   }
