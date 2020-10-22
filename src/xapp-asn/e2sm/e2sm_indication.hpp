@@ -26,9 +26,7 @@
 /* Classes to handle E2 service model based on e2sm-HelloWorld-v001.asn */
 #ifndef SRC_XAPP_ASN_E2SM_E2SM_INDICATION_HPP_
 #define SRC_XAPP_ASN_E2SM_E2SM_INDICATION_HPP_
-
 #include <sstream>
-#include <e2sm_helpers.hpp>
 #include <mdclog/mdclog.h>
 #include <vector>
 
@@ -38,38 +36,62 @@
 #include <E2SM-HelloWorld-IndicationMessage-Format1.h>
 #include <HW-Header.h>
 #include <HW-Message.h>
-
-class e2sm_indication {
+class HWIndicationHeader {
 public:
-	e2sm_indication(void);
-  ~e2sm_indication(void);
+	HWIndicationHeader(void);
+	HWIndicationHeader(unsigned char*, size_t *, bool&);
+  ~HWIndicationHeader(void);
+   std::string  get_error (void) const {return _error_string ;};
 
-  bool set_fields(E2SM_HelloWorld_IndicationHeader_t *, e2sm_indication_helper &);
-  bool set_fields(E2SM_HelloWorld_IndicationMessage_t *, e2sm_indication_helper &);
+  long int get_hw_header(){return this->_hw_header;};
 
-  bool get_fields(E2SM_HelloWorld_IndicationHeader_t *, e2sm_indication_helper &);
-  bool get_fields(E2SM_HelloWorld_IndicationMessage_t *, e2sm_indication_helper &);
+  HWIndicationHeader& set_ricIndicationHeader(int param_header){
+  				_hw_header = param_header; return *this;
+  			}
+  bool decode(unsigned char*, size_t *);
+  bool encode(unsigned char*, size_t *);
 
-  bool encode_indication_header(unsigned char *, size_t *, e2sm_indication_helper &);
-  bool encode_indication_message(unsigned char*, size_t *, e2sm_indication_helper &);
-
-
-  std::string  get_error (void) const {return error_string ;};
 
 private:
 
-  E2SM_HelloWorld_IndicationHeader_t * indication_head; // used for encoding
-  E2SM_HelloWorld_IndicationMessage_t* indication_msg;
-  E2SM_HelloWorld_IndicationHeader_Format1_t head_fmt1;
-  E2SM_HelloWorld_IndicationMessage_Format1_t msg_fmt1;
+  long int _hw_header;
+  E2SM_HelloWorld_IndicationHeader_t * _header; // used for encoding
+  E2SM_HelloWorld_IndicationHeader_Format1_t _header_fmt1;
 
+  bool setfields(E2SM_HelloWorld_IndicationHeader_t *);
 
-  size_t errbuf_len;
-  char errbuf[128];
-  std::string error_string;
+  size_t _errbuf_len = 128;
+  char _errbuf[128];
+  std::string _error_string;
+};
+class HWIndicationMessage {
+public:
+	HWIndicationMessage(void);
+	HWIndicationMessage(unsigned char*, size_t *, bool&);
+  ~HWIndicationMessage(void);
+
+  std::string  get_error (void) const {return _error_string ;};
+  bool decode(unsigned char*, size_t *);
+  bool encode(unsigned char*, size_t *);
+
+  size_t get_hw_message_size(){return this->_hw_msg_size;};
+  unsigned char* get_hw_message(){return this->_hw_msg;};
+  HWIndicationMessage& set_hw_message(unsigned char* msg, size_t *msg_size){return *this;}
+private:
+
+  size_t _hw_msg_size;
+  unsigned char* _hw_msg;
+
+  E2SM_HelloWorld_IndicationMessage_t* _message;
+  E2SM_HelloWorld_IndicationMessage_Format1_t _message_fmt1;
+
+  bool setfields(E2SM_HelloWorld_IndicationMessage_t *);
+
+  size_t _errbuf_len = 128;
+  char _errbuf[128];
+  std::string _error_string;
 };
 
+#endif
 
 
-
-#endif /* SRC_XAPP_ASN_E2SM_E2SM_INDICATION_HPP_ */
