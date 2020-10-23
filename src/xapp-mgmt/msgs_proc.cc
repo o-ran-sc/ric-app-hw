@@ -25,40 +25,6 @@
 
 #include "msgs_proc.hpp"
 
-/*
-bool XappMsgHandler::decode_subscription_response(unsigned char* data_buf, size_t data_size){
-
-	subscription_helper subhelper;
-	subscription_response subresponse;
-	bool res = true;
-	E2AP_PDU_t *e2pdu = 0;
-
-	asn_dec_rval_t rval;
-
-	ASN_STRUCT_RESET(asn_DEF_E2AP_PDU, e2pdu);
-
-	rval = asn_decode(0,ATS_ALIGNED_BASIC_PER, &asn_DEF_E2AP_PDU, (void**)&e2pdu, data_buf, data_size);
-	switch(rval.code)
-	{
-		case RC_OK:
-			   //Put in Subscription Response Object.
-			   //asn_fprint(stdout, &asn_DEF_E2AP_PDU, e2pdu);
-			   break;
-		case RC_WMORE:
-				mdclog_write(MDCLOG_ERR, "RC_WMORE");
-				res = false;
-				break;
-		case RC_FAIL:
-				mdclog_write(MDCLOG_ERR, "RC_FAIL");
-				res = false;
-				break;
-		default:
-				break;
-	 }
-	ASN_STRUCT_FREE(asn_DEF_E2AP_PDU, e2pdu);
-	return res;
-
-}*/
 
 bool  XappMsgHandler::a1_policy_handler(char * message, int *message_len, a1_policy_helper &helper){
 
@@ -178,6 +144,11 @@ void XappMsgHandler::operator()(rmr_mbuf_t *message, bool *resend){
 				*resend = true;
 			}
 			break;
+	case RIC_INDICATION:
+
+		mdclog_write(MDCLOG_INFO, "Received Indication message of type = %d", message->mtype);
+		//pick the relevant decoding code from test_e2sm.h, section(E2SM, IndicationMessageDecode)
+		break;
 
 	default:
 		{

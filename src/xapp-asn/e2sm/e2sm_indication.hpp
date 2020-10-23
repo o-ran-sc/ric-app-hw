@@ -29,7 +29,7 @@
 #include <sstream>
 #include <mdclog/mdclog.h>
 #include <vector>
-
+#include<iostream>
 #include <E2SM-HelloWorld-IndicationHeader.h>
 #include <E2SM-HelloWorld-IndicationMessage.h>
 #include <E2SM-HelloWorld-IndicationHeader-Format1.h>
@@ -39,7 +39,7 @@
 class HWIndicationHeader {
 public:
 	HWIndicationHeader(void);
-	HWIndicationHeader(unsigned char*, size_t *, bool&);
+	HWIndicationHeader(unsigned char*, size_t *);
   ~HWIndicationHeader(void);
    std::string  get_error (void) const {return _error_string ;};
 
@@ -64,10 +64,11 @@ private:
   char _errbuf[128];
   std::string _error_string;
 };
+
 class HWIndicationMessage {
 public:
 	HWIndicationMessage(void);
-	HWIndicationMessage(unsigned char*, size_t *, bool&);
+	HWIndicationMessage(unsigned char*, size_t *);
   ~HWIndicationMessage(void);
 
   std::string  get_error (void) const {return _error_string ;};
@@ -76,11 +77,16 @@ public:
 
   size_t get_hw_message_size(){return this->_hw_msg_size;};
   unsigned char* get_hw_message(){return this->_hw_msg;};
-  HWIndicationMessage& set_hw_message(unsigned char* msg, size_t *msg_size){return *this;}
+  HWIndicationMessage& set_hw_message(std::string msg)
+  {
+	  _hw_msg_size=strlen(msg.c_str());
+	   strncpy((char*)_hw_msg,msg.c_str(),_hw_msg_size);
+	   return *this;
+  }
 private:
 
   size_t _hw_msg_size;
-  unsigned char* _hw_msg;
+  unsigned char _hw_msg[30];
 
   E2SM_HelloWorld_IndicationMessage_t* _message;
   E2SM_HelloWorld_IndicationMessage_Format1_t _message_fmt1;
