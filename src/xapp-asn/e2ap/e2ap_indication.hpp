@@ -72,9 +72,7 @@ template <typename E2SMIndicationHeader, typename E2SMIndicationMessage>
 class E2APIndication{
 
 public:
-	E2APIndication();
-	E2APIndication(unsigned char *, size_t *, bool&);
-	~E2APIndication(void);
+
 	class IndicationIEs{
 		private:
 			long int ricRequestorID, ranFunctionID, ricActionID, ricIndicationSN, ricIndicationType;
@@ -87,28 +85,58 @@ public:
 			unsigned char ricCallProcessId[IE_SIZE];
 			size_t ricCallProcessId_size = IE_SIZE;
 
+			bool is_callProcessID;
+
 		public:
-			IndicationIEs(void) : ricRequestorID(0), ranFunctionID(0), ricActionID(0),ricIndicationSN(0), ricIndicationType(0){};
+			IndicationIEs(void) : ricRequestorID(0), ranFunctionID(0), ricActionID(0),ricIndicationSN(0), ricIndicationType(0),is_callProcessID(false){};
 			void* get_ricIndicationMessage(){return this->ricIndicationMessage; };
 			void* get_ricIndicationHeader(){return this->ricIndicationHeader; };
 			void* get_ricCallProcessId(){return this->ricCallProcessId;};
 
-			size_t get_ricIndicationMessageSize(){return this->ricIndicationMessage_size; };
-			size_t get_ricIndicationHeaderSize(){return this->ricIndicationHeader_size; };
-			size_t get_ricCallProcessIdSize(){return this->ricCallProcessId_size;};
+			size_t get_ricIndicationMessage_size(){return this->ricIndicationMessage_size; };
+			size_t get_ricIndicationHeader_size(){return this->ricIndicationHeader_size; };
+			size_t get_ricCallProcessId_size(){return this->ricCallProcessId_size;};
 
 			long int get_ricRequestorID(){return this->ricRequestorID;};
 			long int get_ranFunctionID(){return this->ranFunctionID;};
 			long int get_ricActionID(){return this->ricActionID;};
+			long int get_ricIndicationType(){return this->ricIndicationType;}
 			long int get_ricIndicationSN(){return this->ricIndicationSN;};
 
-			IndicationIEs& set_ricIndicationHeader(unsigned char* header, size_t header_size){
-				memcpy(ricIndicationHeader,header,header_size); ricIndicationHeader_size = header_size; return *this;
+			bool get_is_callProcessID(){return this->is_callProcessID;};
+
+			IndicationIEs& set_ricIndicationHeader(E2SMIndicationHeader e2smObj){
+				bool res = e2smObj.encode(&(this->ricIndicationHeader)[0],&this->ricIndicationHeader_size);
+				if(!res){
+						mdclog_write(MDCLOG_ERR, "Failed to encode: %s","RIC Indication Header");
+						mdclog_write(MDCLOG_ERR, "Error during encode: %s",e2smObj.get_error());
+
+					} else {
+						 mdclog_write(MDCLOG_INFO, "Successfully encoded: %s","RIC Indication Header");
+				}
+					return *this;
 			}
+			IndicationIEs& set_ricIndicationMessage(E2SMIndicationMessage e2smObj){
+				bool res = e2smObj.encode(&(this->ricIndicationMessage)[0],&this->ricIndicationMessage_size);
+				if(!res){
+							mdclog_write(MDCLOG_ERR, "Failed to encode: %s","RIC Indication Message");
+							mdclog_write(MDCLOG_ERR, "Error during encode: %s",e2smObj.get_error());
+						} else {
+   						    mdclog_write(MDCLOG_INFO, "Successfully encoded: %s","RIC Indication Message");
+						}
+
+				return *this;
+
+			}
+
+			IndicationIEs& set_ricIndicationHeader(unsigned char* header, size_t header_size){
+							memcpy(ricIndicationHeader,header,header_size); ricIndicationHeader_size = header_size; return *this;
+						}
 			IndicationIEs& set_ricIndicationMessage(unsigned char* message, size_t message_size){
-				memcpy(ricIndicationHeader,message,message_size); ricIndicationMessage_size = message_size; return *this;}
+							memcpy(ricIndicationHeader,message,message_size); ricIndicationMessage_size = message_size; return *this;}
 
 			IndicationIEs& set_ricCallProcessID(unsigned char* callproc, size_t callproc_size){
+				is_callProcessID = true;
 				memcpy(ricCallProcessId, callproc, callproc_size); ricCallProcessId_size = callproc_size;
 				return *this;
 			}
@@ -122,6 +150,9 @@ public:
 
 	};
 
+   E2APIndication(IndicationIEs&);
+   E2APIndication(unsigned char *, size_t *);
+  ~E2APIndication(void);
   IndicationIEs getIndicationIEs(){ return *_indicationIEs.get(); }
 
   std::string get_error(void) const {return _error_string ; };
@@ -145,7 +176,7 @@ private:
 };
 
 template<typename T1, typename T2>
-E2APIndication<T1,T2>::E2APIndication(){
+E2APIndication<T1,T2>::E2APIndication(IndicationIEs& ieObj){
 
   ricIndicationIEs_Count = 8;
 
@@ -165,17 +196,19 @@ E2APIndication<T1,T2>::E2APIndication(){
   e2ap_pdu_obj->choice.initiatingMessage = initMsg;
 
   _indicationIEs = std::make_unique<IndicationIEs>();
+  *_indicationIEs = ieObj;
 
 };
 template<typename T1, typename T2>
-E2APIndication<T1,T2>::E2APIndication(unsigned char *buf, size_t *size, bool &status){
+E2APIndication<T1,T2>::E2APIndication(unsigned char *buf, size_t *size){
 	  e2ap_pdu_obj = 0;
 	  initMsg = 0;
 	  IE_array = 0;
 
 	  _indicationIEs = std::make_unique<IndicationIEs>();
-	   status =  this->decode(buf, size);
-
+	   bool status =  this->decode(buf, size);
+	   if(!status)
+		   throw "E2AP Indication Decode Failed: "+this->get_error();
 }
 
 
@@ -331,7 +364,7 @@ bool E2APIndication<T1,T2>::setfields(InitiatingMessage_t *initMsg){
   ies_ricreq->id = ProtocolIE_ID_id_RICrequestID;
   ies_ricreq->value.present = RICindication_IEs__value_PR_RICrequestID;
   RICrequestID_t *ricrequest_ie = &ies_ricreq->value.choice.RICrequestID;
-  ricrequest_ie->ricRequestorID = _indicationIEs->ricRequestorID;
+  ricrequest_ie->ricRequestorID = _indicationIEs->get_ricRequestorID();
   ASN_SEQUENCE_ADD(&(ric_indication->protocolIEs), &(IE_array[ie_index]));
 
   ie_index = 1;
@@ -340,7 +373,7 @@ bool E2APIndication<T1,T2>::setfields(InitiatingMessage_t *initMsg){
   ies_ranfunc->id = ProtocolIE_ID_id_RANfunctionID;
   ies_ranfunc->value.present = RICindication_IEs__value_PR_RANfunctionID;
   RANfunctionID_t *ranfunction_ie = &ies_ranfunc->value.choice.RANfunctionID;
-  *ranfunction_ie = _indicationIEs->ranFunctionID;
+  *ranfunction_ie = _indicationIEs->get_ranFunctionID();
   ASN_SEQUENCE_ADD(&(ric_indication->protocolIEs), &(IE_array[ie_index]));
 
   ie_index = 2;
@@ -349,7 +382,7 @@ bool E2APIndication<T1,T2>::setfields(InitiatingMessage_t *initMsg){
   ies_actid->id = ProtocolIE_ID_id_RICactionID;
   ies_actid->value.present = RICindication_IEs__value_PR_RICactionID;
   RICactionID_t *ricaction_ie = &ies_actid->value.choice.RICactionID;
-  *ricaction_ie = _indicationIEs->ricActionID;
+  *ricaction_ie = _indicationIEs->get_ricActionID();
   ASN_SEQUENCE_ADD(&(ric_indication->protocolIEs), &(IE_array[ie_index]));
 
   ie_index = 3;
@@ -358,7 +391,7 @@ bool E2APIndication<T1,T2>::setfields(InitiatingMessage_t *initMsg){
   ies_ricsn->id = ProtocolIE_ID_id_RICindicationSN;
   ies_ricsn->value.present = RICindication_IEs__value_PR_RICindicationSN;
   RICindicationSN_t *ricsn_ie = &ies_ricsn->value.choice.RICindicationSN;
-  *ricsn_ie = _indicationIEs->ricIndicationSN;
+  *ricsn_ie = _indicationIEs->get_ricIndicationSN();
   ASN_SEQUENCE_ADD(&(ric_indication->protocolIEs), &(IE_array[ie_index]));
 
 
@@ -368,7 +401,7 @@ bool E2APIndication<T1,T2>::setfields(InitiatingMessage_t *initMsg){
   ies_indtyp->id = ProtocolIE_ID_id_RICindicationType;
   ies_indtyp->value.present = RICindication_IEs__value_PR_RICindicationType;
   RICindicationType_t *rictype_ie = &ies_indtyp->value.choice.RICindicationType;
-  *rictype_ie = _indicationIEs->ricIndicationType;
+  *rictype_ie = _indicationIEs->get_ricIndicationType();
   ASN_SEQUENCE_ADD(&(ric_indication->protocolIEs), &(IE_array[ie_index]));
 
   ie_index = 5;
@@ -377,8 +410,8 @@ bool E2APIndication<T1,T2>::setfields(InitiatingMessage_t *initMsg){
   ies_richead->id = ProtocolIE_ID_id_RICindicationHeader;
   ies_richead->value.present = RICindication_IEs__value_PR_RICindicationHeader;
   RICindicationHeader_t *richeader_ie = &ies_richead->value.choice.RICindicationHeader;
-  richeader_ie->buf = _indicationIEs->ricIndicationHeader;
-  richeader_ie->size = _indicationIEs->ricIndicationHeader_size;
+  richeader_ie->buf = (uint8_t*)_indicationIEs->get_ricIndicationHeader();
+  richeader_ie->size = _indicationIEs->get_ricIndicationHeader_size();
   ASN_SEQUENCE_ADD(&(ric_indication->protocolIEs), &(IE_array[ie_index]));
 
   ie_index = 6;
@@ -387,21 +420,21 @@ bool E2APIndication<T1,T2>::setfields(InitiatingMessage_t *initMsg){
   ies_indmsg->id = ProtocolIE_ID_id_RICindicationMessage;
   ies_indmsg->value.present = RICindication_IEs__value_PR_RICindicationMessage;
   RICindicationMessage_t *ricmsg_ie = &ies_indmsg->value.choice.RICindicationMessage;
-  ricmsg_ie->buf = _indicationIEs->ricIndicationMessage;
-  ricmsg_ie->size = _indicationIEs->ricIndicationMessage_size;
+  ricmsg_ie->buf = (uint8_t*)_indicationIEs->get_ricIndicationMessage();
+  ricmsg_ie->size = _indicationIEs->get_ricIndicationMessage_size();
   ASN_SEQUENCE_ADD(&(ric_indication->protocolIEs), &(IE_array[ie_index]));
 
 
   // optional call process id ..
-  if (_indicationIEs->call_process_id_size > 0){
+  if (_indicationIEs->get_is_callProcessID()){
     ie_index = 7;
     RICindication_IEs_t *ies_ind_callprocessid = &IE_array[ie_index];
     ies_ind_callprocessid->criticality = Criticality_reject;
     ies_ind_callprocessid->id = ProtocolIE_ID_id_RICcallProcessID;
     ies_ind_callprocessid->value.present = RICindication_IEs__value_PR_RICcallProcessID;
     RICcallProcessID_t *riccallprocessid_ie = &ies_ind_callprocessid->value.choice.RICcallProcessID;
-    riccallprocessid_ie->buf = _indicationIEs->call_process_id;
-    riccallprocessid_ie->size = _indicationIEs->call_process_id_size;
+    riccallprocessid_ie->buf = (uint8_t*)_indicationIEs->get_ricCallProcessId();
+    riccallprocessid_ie->size = _indicationIEs->get_ricCallProcessId_size();
     ASN_SEQUENCE_ADD(&(ric_indication->protocolIEs), &(IE_array[ie_index]));
   }
 

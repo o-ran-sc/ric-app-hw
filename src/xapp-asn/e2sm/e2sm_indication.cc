@@ -33,18 +33,19 @@
 	_message = 0;
     _message = (E2SM_HelloWorld_IndicationMessage_t*)calloc(1, sizeof(E2SM_HelloWorld_IndicationMessage_t));
     assert(_message !=0);
-    _hw_msg = 0;
     _hw_msg_size = 0;
   };
 
  //initialize
- HWIndicationMessage::HWIndicationMessage(unsigned char *buf, size_t *size, bool &status){
+ HWIndicationMessage::HWIndicationMessage(unsigned char *buf, size_t *size){
 
 	_message = 0;
-    _hw_msg = 0;
     _hw_msg_size = 0;
 
-    status = this->decode(buf, size);
+    bool status = this->decode(buf, size);
+    if(!status)
+    	throw "HWIndicationMessage: "+this->get_error();
+
 
  };
 
@@ -61,12 +62,14 @@
    };
 
   //initialize
-   HWIndicationHeader::HWIndicationHeader(unsigned char *buf, size_t *size, bool &status){
+   HWIndicationHeader::HWIndicationHeader(unsigned char *buf, size_t *size){
 
   	_header = 0;
   	_hw_header = 0;
 
-      status = this->decode(buf, size);
+  	bool status = this->decode(buf, size);
+   // if(!status)
+   // throw "HWIndicationHeader: "+this->get_error();
 
    };
 
@@ -75,6 +78,7 @@
 
   mdclog_write(MDCLOG_DEBUG, "Freeing event trigger object memory");
   _message->choice.indicationMessage_Format1 = 0;
+
   ASN_STRUCT_FREE(asn_DEF_E2SM_HelloWorld_IndicationMessage, _message);
 
 
@@ -125,6 +129,8 @@ bool HWIndicationHeader::encode(unsigned char *buf, size_t *size){
 }
 
 bool HWIndicationMessage::encode(unsigned char *buf, size_t *size){
+
+  ASN_STRUCT_RESET(asn_DEF_E2SM_HelloWorld_IndicationMessage, _message);
 
   bool res;
   res = setfields(_message);
@@ -180,7 +186,6 @@ bool HWIndicationMessage::setfields(E2SM_HelloWorld_IndicationMessage_t * _messa
     return false;
   }
   _message->present = E2SM_HelloWorld_IndicationMessage_PR_indicationMessage_Format1;
-
   _message_fmt1.indicationMsgParam.buf = this->get_hw_message();
   _message_fmt1.indicationMsgParam.size = this->get_hw_message_size();
   _message->choice.indicationMessage_Format1 = &_message_fmt1;
@@ -189,9 +194,13 @@ bool HWIndicationMessage::setfields(E2SM_HelloWorld_IndicationMessage_t * _messa
 };
 
 bool HWIndicationHeader::decode(unsigned char *buf, size_t *size){
+	_header = 0;
+
 	asn_dec_rval_t dec_res  = asn_decode(0,ATS_ALIGNED_BASIC_PER, &asn_DEF_E2SM_HelloWorld_IndicationHeader, (void**)&(_header), buf, *size);
-	 if(dec_res.code != RC_OK){
+
+	if(dec_res.code != RC_OK){
 		 mdclog_write(MDCLOG_ERR, "Failed to decode: %s","HW-E2SM RIC Indication Header");
+		 _error_string = "Failed to decode HW-E2SM RIC Indication Header";
 		 return false;
 	 } else {
 		 mdclog_write(MDCLOG_INFO, "Successfully decoded: %s","HW-E2SM RIC Indication Header");
