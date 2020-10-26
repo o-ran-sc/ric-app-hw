@@ -19,7 +19,7 @@
 */
 
 /*
- * indication.hpp
+ * e2ap_indication.hpp
  *
  *  Created on: Sep 18, 2020
  *      Author: Shraboni Jana
@@ -66,7 +66,7 @@ RICindication-IEs E2AP-PROTOCOL-IES ::= {
 #include <sstream>
 #include <memory>
 
-#define IE_SIZE ((int)128)
+#include "e2ap_consts.hpp"
 
 template <typename E2SMIndicationHeader, typename E2SMIndicationMessage>
 class E2APIndication{
@@ -85,10 +85,10 @@ public:
 			unsigned char ricCallProcessId[IE_SIZE];
 			size_t ricCallProcessId_size = IE_SIZE;
 
-			bool is_callProcessID;
+			bool is_callProcessID, is_ricIndicationSN;
 
 		public:
-			IndicationIEs(void) : ricRequestorID(0), ranFunctionID(0), ricActionID(0),ricIndicationSN(0), ricIndicationType(0),is_callProcessID(false){};
+			IndicationIEs(void) : ricRequestorID(0), ranFunctionID(0), ricActionID(0),ricIndicationSN(0), ricIndicationType(0),is_callProcessID(false),is_ricIndicationSN(false){};
 			void* get_ricIndicationMessage(){return this->ricIndicationMessage; };
 			void* get_ricIndicationHeader(){return this->ricIndicationHeader; };
 			void* get_ricCallProcessId(){return this->ricCallProcessId;};
@@ -102,7 +102,7 @@ public:
 			long int get_ricActionID(){return this->ricActionID;};
 			long int get_ricIndicationType(){return this->ricIndicationType;}
 			long int get_ricIndicationSN(){return this->ricIndicationSN;};
-
+			bool get_is_ricIndicationSN(){return this->is_ricIndicationSN;};
 			bool get_is_callProcessID(){return this->is_callProcessID;};
 
 			IndicationIEs& set_ricIndicationHeader(E2SMIndicationHeader e2smObj){
@@ -145,7 +145,7 @@ public:
 			IndicationIEs& set_ranFunctionID(long int funcID){this->ranFunctionID = funcID; return *this;}
 			IndicationIEs& set_ricActionID(long int actID){ this->ricActionID = actID; return *this;}
 			IndicationIEs& set_ricIndicationType(long int typ){ this->ricIndicationType = typ; return *this;}
-			IndicationIEs& set_ricIndicationSN(long int sn){ this->ricIndicationSN = sn; return *this;}
+			IndicationIEs& set_ricIndicationSN(long int sn){ this->ricIndicationSN = sn; is_ricIndicationSN=true; return *this;}
 
 
 	};
@@ -166,8 +166,6 @@ private:
   RICindication_IEs_t *IE_array;
   std::unique_ptr<IndicationIEs> _indicationIEs;
 
-  unsigned int ricIndicationIEs_Count;
-
   std::string _error_string;
   char _errbuf[128];
   size_t _errbuf_len = 128;
@@ -178,8 +176,6 @@ private:
 template<typename T1, typename T2>
 E2APIndication<T1,T2>::E2APIndication(IndicationIEs& ieObj){
 
-  ricIndicationIEs_Count = 8;
-
   e2ap_pdu_obj = 0;
   e2ap_pdu_obj = (E2AP_PDU_t * )calloc(1, sizeof(E2AP_PDU_t));
   assert(e2ap_pdu_obj != 0);
@@ -189,7 +185,7 @@ E2APIndication<T1,T2>::E2APIndication(IndicationIEs& ieObj){
   assert(initMsg != 0);
 
   IE_array = 0;
-  IE_array = (RICindication_IEs_t *)calloc(ricIndicationIEs_Count, sizeof(RICindication_IEs_t));
+  IE_array = (RICindication_IEs_t *)calloc(RIC_INDICATION_IES_COUNT, sizeof(RICindication_IEs_t));
   assert(IE_array != 0);
 
   e2ap_pdu_obj->present = E2AP_PDU_PR_initiatingMessage;
@@ -367,7 +363,7 @@ bool E2APIndication<T1,T2>::setfields(InitiatingMessage_t *initMsg){
   ricrequest_ie->ricRequestorID = _indicationIEs->get_ricRequestorID();
   ASN_SEQUENCE_ADD(&(ric_indication->protocolIEs), &(IE_array[ie_index]));
 
-  ie_index = 1;
+  ie_index++;
   RICindication_IEs_t *ies_ranfunc = &IE_array[ie_index];
   ies_ranfunc->criticality = Criticality_reject;
   ies_ranfunc->id = ProtocolIE_ID_id_RANfunctionID;
@@ -376,7 +372,7 @@ bool E2APIndication<T1,T2>::setfields(InitiatingMessage_t *initMsg){
   *ranfunction_ie = _indicationIEs->get_ranFunctionID();
   ASN_SEQUENCE_ADD(&(ric_indication->protocolIEs), &(IE_array[ie_index]));
 
-  ie_index = 2;
+  ie_index++;
   RICindication_IEs_t *ies_actid = &IE_array[ie_index];
   ies_actid->criticality = Criticality_reject;
   ies_actid->id = ProtocolIE_ID_id_RICactionID;
@@ -385,17 +381,19 @@ bool E2APIndication<T1,T2>::setfields(InitiatingMessage_t *initMsg){
   *ricaction_ie = _indicationIEs->get_ricActionID();
   ASN_SEQUENCE_ADD(&(ric_indication->protocolIEs), &(IE_array[ie_index]));
 
-  ie_index = 3;
-  RICindication_IEs_t *ies_ricsn = &IE_array[ie_index];
-  ies_ricsn->criticality = Criticality_reject;
-  ies_ricsn->id = ProtocolIE_ID_id_RICindicationSN;
-  ies_ricsn->value.present = RICindication_IEs__value_PR_RICindicationSN;
-  RICindicationSN_t *ricsn_ie = &ies_ricsn->value.choice.RICindicationSN;
-  *ricsn_ie = _indicationIEs->get_ricIndicationSN();
-  ASN_SEQUENCE_ADD(&(ric_indication->protocolIEs), &(IE_array[ie_index]));
+  if(_indicationIEs->get_is_ricIndicationSN())
+  {
+	  ie_index++;
+	  RICindication_IEs_t *ies_ricsn = &IE_array[ie_index];
+	  ies_ricsn->criticality = Criticality_reject;
+	  ies_ricsn->id = ProtocolIE_ID_id_RICindicationSN;
+	  ies_ricsn->value.present = RICindication_IEs__value_PR_RICindicationSN;
+	  RICindicationSN_t *ricsn_ie = &ies_ricsn->value.choice.RICindicationSN;
+	  *ricsn_ie = _indicationIEs->get_ricIndicationSN();
+	  ASN_SEQUENCE_ADD(&(ric_indication->protocolIEs), &(IE_array[ie_index]));
+  }
 
-
-  ie_index = 4;
+  ie_index++;
   RICindication_IEs_t *ies_indtyp = &IE_array[ie_index];
   ies_indtyp->criticality = Criticality_reject;
   ies_indtyp->id = ProtocolIE_ID_id_RICindicationType;
@@ -404,7 +402,7 @@ bool E2APIndication<T1,T2>::setfields(InitiatingMessage_t *initMsg){
   *rictype_ie = _indicationIEs->get_ricIndicationType();
   ASN_SEQUENCE_ADD(&(ric_indication->protocolIEs), &(IE_array[ie_index]));
 
-  ie_index = 5;
+  ie_index++;
   RICindication_IEs_t *ies_richead = &IE_array[ie_index];
   ies_richead->criticality = Criticality_reject;
   ies_richead->id = ProtocolIE_ID_id_RICindicationHeader;
@@ -414,7 +412,7 @@ bool E2APIndication<T1,T2>::setfields(InitiatingMessage_t *initMsg){
   richeader_ie->size = _indicationIEs->get_ricIndicationHeader_size();
   ASN_SEQUENCE_ADD(&(ric_indication->protocolIEs), &(IE_array[ie_index]));
 
-  ie_index = 6;
+  ie_index++;
   RICindication_IEs_t *ies_indmsg = &IE_array[ie_index];
   ies_indmsg->criticality = Criticality_reject;
   ies_indmsg->id = ProtocolIE_ID_id_RICindicationMessage;
@@ -427,7 +425,7 @@ bool E2APIndication<T1,T2>::setfields(InitiatingMessage_t *initMsg){
 
   // optional call process id ..
   if (_indicationIEs->get_is_callProcessID()){
-    ie_index = 7;
+    ie_index++;
     RICindication_IEs_t *ies_ind_callprocessid = &IE_array[ie_index];
     ies_ind_callprocessid->criticality = Criticality_reject;
     ies_ind_callprocessid->id = ProtocolIE_ID_id_RICcallProcessID;

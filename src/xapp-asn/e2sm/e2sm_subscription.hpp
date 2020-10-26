@@ -20,7 +20,7 @@
  * e2sm_subscription.hpp
  *
  *  Created on: Jun 30, 2020
- *      Author: sjana
+ *      Author: Shraboni Jana
  */
 
 #ifndef XAPP_ASN_REFACTOR_E2SM_SUBSCRIPTION_HPP_

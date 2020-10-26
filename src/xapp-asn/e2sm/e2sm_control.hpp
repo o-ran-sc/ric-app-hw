@@ -17,7 +17,7 @@
 ==================================================================================
 */
 /*
- * e2sm_indication.hpp
+ * e2sm_control.hpp
  *
  *  Created on: Apr, 2020
  *      Author: Shraboni Jana

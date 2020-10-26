@@ -17,7 +17,7 @@
 ==================================================================================
 */
 /*
- * HWIndicationMessage.cc
+ * e2sm_indication.cc
  *
  *  Created on: Apr, 2020
  *      Author: Shraboni Jana

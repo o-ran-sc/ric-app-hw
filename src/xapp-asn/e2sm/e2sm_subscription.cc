@@ -20,7 +20,7 @@
  * e2sm_subscription.cc
  *
  *  Created on: Jun 30, 2020
- *      Author: sjana
+ *      Author: Shraboni Jana
  */
 
 #include "e2sm_subscription.hpp"

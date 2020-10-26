@@ -16,11 +16,21 @@
    limitations under the License.
 ==================================================================================
 */
+/*
+ * test_subs.h
+ *
+ *  Created on: Apr, 2020
+ *      Author: Shraboni Jana
+ */
+
 #ifndef TEST_TEST_SUBS_H_
 #define TEST_TEST_SUBS_H_
 
 #include<iostream>
 #include<gtest/gtest.h>
+
+#include "e2ap_subscription_request.hpp"
+#include "e2ap_subsdel_request.hpp"
 #include "xapp.hpp"
 #define BUFFER_SIZE 1024
 
@@ -152,7 +162,33 @@ TEST(SubscriptionRequest, MultipleActions)
 
 }
 
+TEST(E2AP, SubscriptionDeleteRequest){
+
+	unsigned char buff[1024];
+	size_t buff_size = 1024;
+
+
+	E2APSubscriptionDeleteRequest::SubscriptionDeleteRequestIEs dataObj;
+
+	dataObj.set_ranFunctionID(1);
+	dataObj.set_ricInstanceID(1);
+	dataObj.set_ricRequestorID(3);
+
+	E2APSubscriptionDeleteRequest requestObj(dataObj);
+	bool res = requestObj.encode(buff, &buff_size);
+	if(!res)
+	{
+		std::cout << requestObj.get_error() << std::endl;
+	}
+	ASSERT_TRUE(res);
+
+
+}
+
+
+
 //create a MOck e2term
+
 TEST (MOCK, E2TERM){
 
 	 const char* meid = "test1";
@@ -184,5 +220,6 @@ TEST (MOCK, E2TERM){
 		 sleep(10);
 	 }
 }
+
 
 #endif /* TEST_TEST_SUBS_H_ */

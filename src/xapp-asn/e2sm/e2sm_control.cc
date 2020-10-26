@@ -17,7 +17,7 @@
 ==================================================================================
 */
 /*
- * HWControlMessage.cc
+ * e2sm_control.cc
  *
  *  Created on: Apr, 2020
  *      Author: Shraboni Jana

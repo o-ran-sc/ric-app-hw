@@ -16,7 +16,7 @@
    limitations under the License.
 ==================================================================================
 /*
- * test_asn.h
+ * test_e2sm.h
  *
  *  Created on: Apr, 2020
  *      Author: Shraboni Jana
@@ -27,11 +27,11 @@
 #include<iostream>
 #include<gtest/gtest.h>
 
+#include "e2ap_control_request.hpp"
 #include "xapp.hpp"
 #include "e2sm_control.hpp"
 #include "e2ap_indication.hpp"
 #include "e2sm_indication.hpp"
-#include "e2ap_control.hpp"
 
 using namespace std;
 TEST(E2SM, IndicationMessageEncode)
@@ -58,18 +58,19 @@ TEST(E2SM, IndicationMessageEncode)
 	E2APIndication<HWIndicationHeader,HWIndicationMessage> e2obj(infoObj);
 
 	bool res = e2obj.encode(buff, &buf_len);
-			if(!res)
-			{
-				std::cout << e2obj.get_error() << std::endl;
-			}
-			ASSERT_TRUE(res);
+	if(!res)
+	{
+		std::cout << e2obj.get_error() << std::endl;
+	}
+	ASSERT_TRUE(res);
 
 
 	FILE * pFile;
 	pFile = fopen ("indication2.per","w");
 	if (pFile!=NULL)
 	 {
-	      fputs ((const char*)buff,pFile);
+		  fwrite (buff , sizeof(char), buf_len, pFile);
+	      sleep(2);
 		  fclose (pFile);
 	  }
 
@@ -136,7 +137,7 @@ TEST(E2SM, ControlMessage)
 	infoObj.set_ricRequestorID(1);
 	infoObj.set_ricControlHeader(headObj);
 	infoObj.set_ricControlMessage(msgObj);
-
+	infoObj.set_ricCallProcessID("ProcessID");
 
 	E2APControlMessage<HWControlHeader,HWControlMessage>  cntrlObj(infoObj);
 

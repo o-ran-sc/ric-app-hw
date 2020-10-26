@@ -17,10 +17,10 @@
 ==================================================================================
 */
 /*
- * e2ap_subscription.hpp
+ * e2ap_subscription_request.hpp
  *
  *  Created on: Jun 30, 2020
- *      Author: sjana
+ *      Author: Shraboni Jana
  */
 
 #ifndef XAPP_ASN_REFACTOR_E2AP_SUBSCRIPTION_HPP_
@@ -63,8 +63,8 @@ public:
 	class SubscriptionRequestIEs{
 	private:
 		 long int ricRequestorID, ricInstanceID, ranFunctionID;
-		 size_t ricEventTriggerDefinition_size = E2SM_SIZE;
-		 unsigned char ricEventTriggerDefinition[E2SM_SIZE];
+		 size_t ricEventTriggerDefinition_size = IE_SIZE;
+		 unsigned char ricEventTriggerDefinition[IE_SIZE];
 
 		 int ricAction_ToBeSetup_List_Count;
 		 std::vector<typename E2APAction<E2SMActionDefinition>::ActionIEs> *ricAction_ToBeSetup_List;
@@ -112,7 +112,6 @@ public:
 	SubscriptionRequestIEs& getIEs(){ return *_requestIEs.get();};
 private:
 
-	unsigned int ricSubscriptionRequestIEs_Count;
 	InitiatingMessage_t *initMsg;
 	E2AP_PDU_t * e2ap_pdu_obj;
 	RICsubscriptionRequest_IEs_t * IE_array;
@@ -130,8 +129,6 @@ private:
 template <typename T1,typename T2>
 E2APSubscriptionRequest<T1,T2>::E2APSubscriptionRequest(SubscriptionRequestIEs &subRequestObj){
 
-   ricSubscriptionRequestIEs_Count = 3;
-
   _requestIEs = std::make_unique<SubscriptionRequestIEs>();
   *_requestIEs = subRequestObj;
 
@@ -145,10 +142,10 @@ E2APSubscriptionRequest<T1,T2>::E2APSubscriptionRequest(SubscriptionRequestIEs &
 
 
   IE_array = 0;
-  if(this->ricSubscriptionRequestIEs_Count == 0) {
+  if(RIC_SUB_REQUEST_IES_COUNT == 0) {
 		  mdclog_write(MDCLOG_ERR, "E2AP Subscription Request IEs = 0.");
   }
-  IE_array = (RICsubscriptionRequest_IEs_t *)calloc(this->ricSubscriptionRequestIEs_Count, sizeof(RICsubscriptionRequest_IEs_t));
+  IE_array = (RICsubscriptionRequest_IEs_t *)calloc(RIC_SUB_REQUEST_IES_COUNT, sizeof(RICsubscriptionRequest_IEs_t));
   assert(IE_array != 0);
 
 
@@ -282,7 +279,7 @@ bool E2APSubscriptionRequest<T1,T2>::setfields( InitiatingMessage_t * init_msg){
   result = ASN_SEQUENCE_ADD(&(ric_subscription->protocolIEs), &IE_array[ie_index]);
   	  assert(result == 0);
 
-  ie_index = 1;
+  ie_index++;
   RICsubscriptionRequest_IEs_t *ies_ranfunc = &IE_array[ie_index];
   ies_ranfunc->criticality = Criticality_reject;
   ies_ranfunc->id = ProtocolIE_ID_id_RANfunctionID;
@@ -293,7 +290,7 @@ bool E2APSubscriptionRequest<T1,T2>::setfields( InitiatingMessage_t * init_msg){
   assert(result == 0);
 
 
-  ie_index = 2;
+  ie_index++;
   RICsubscriptionRequest_IEs_t *ies_actid = &IE_array[ie_index];
   ies_actid->criticality = Criticality_reject;
   ies_actid->id = ProtocolIE_ID_id_RICsubscriptionDetails;
@@ -323,15 +320,17 @@ bool E2APSubscriptionRequest<T1,T2>::setfields( InitiatingMessage_t * init_msg){
     	action_array[i].value.choice.RICaction_ToBeSetup_Item.ricSubsequentAction->ricSubsequentActionType = (*ref_action_array)[i].get_ricSubsequentActionType();
     	action_array[i].value.choice.RICaction_ToBeSetup_Item.ricSubsequentAction->ricTimeToWait = (*ref_action_array)[i].get_ricTimeToWait();
     }
-    action_array[i].value.choice.RICaction_ToBeSetup_Item.ricActionDefinition = (RICactionDefinition_t*)calloc(1, sizeof(RICactionDefinition_t));
 
-    auto actionSize =  (*ref_action_array)[i].get_ricActionDefinition_size();
-    action_array[i].value.choice.RICaction_ToBeSetup_Item.ricActionDefinition->size = actionSize;
-    action_array[i].value.choice.RICaction_ToBeSetup_Item.ricActionDefinition->buf = (uint8_t *)calloc(1,actionSize);
-    memcpy(action_array[i].value.choice.RICaction_ToBeSetup_Item.ricActionDefinition->buf, (uint8_t*)(*ref_action_array)[i].get_ricActionDefinition(), actionSize);
+    if((*ref_action_array)[i].get_is_ricActionDefinition()){
+    	action_array[i].value.choice.RICaction_ToBeSetup_Item.ricActionDefinition = (RICactionDefinition_t*)calloc(1, sizeof(RICactionDefinition_t));
 
-    action_array[i].value.choice.RICaction_ToBeSetup_Item.ricActionDefinition->size = actionSize;
+    	auto actionSize =  (*ref_action_array)[i].get_ricActionDefinition_size();
+    	action_array[i].value.choice.RICaction_ToBeSetup_Item.ricActionDefinition->size = actionSize;
+    	action_array[i].value.choice.RICaction_ToBeSetup_Item.ricActionDefinition->buf = (uint8_t *)calloc(1,actionSize);
+    	memcpy(action_array[i].value.choice.RICaction_ToBeSetup_Item.ricActionDefinition->buf, (uint8_t*)(*ref_action_array)[i].get_ricActionDefinition(), actionSize);
 
+    	action_array[i].value.choice.RICaction_ToBeSetup_Item.ricActionDefinition->size = actionSize;
+    }
 
     result = ASN_SEQUENCE_ADD(&ricsubscription_ie->ricAction_ToBeSetup_List, &(action_array[i]));
     if (result == -1){

@@ -17,15 +17,14 @@
 ==================================================================================
 */
 /*
- * action_e2ap.hpp
+ * e2ap_action.hpp
  *
  *  Created on: Jun 30, 2020
- *      Author: sjana
+ *      Author: Shraboni Jana
  */
 
 #ifndef XAPP_ASN_REFACTOR_E2AP_ACTION_HPP_
 #define XAPP_ASN_REFACTOR_E2AP_ACTION_HPP_
-#define E2SM_SIZE ((int)128)
 
 #include <mdclog/mdclog.h>
 
@@ -33,6 +32,8 @@
 #include <memory>
 #include <sstream>
 #include <vector>
+
+#include "e2ap_consts.hpp"
 /*
  RICaction-ToBeSetup-Item ::= SEQUENCE {
 	ricActionID					RICactionID,
@@ -56,12 +57,12 @@ class E2APAction{
 public:
 	class ActionIEs{
 	private:
-			 bool is_ricSubsequentAction;
+			 bool is_ricSubsequentAction, is_ricActionDefinition;
 			 unsigned int ricActionType, ricActionID,ricSubsequentActionType,ricTimeToWait;
-			 unsigned char ricActionDefinition[E2SM_SIZE];
-			 size_t ricActionDefinition_size = E2SM_SIZE;
+			 unsigned char ricActionDefinition[IE_SIZE];
+			 size_t ricActionDefinition_size = IE_SIZE;
 	public:
-			 ActionIEs():ricActionType(0),ricActionID(0),ricSubsequentActionType(0),ricTimeToWait(0),is_ricSubsequentAction(false){ };
+			 ActionIEs():ricActionType(0),ricActionID(0),ricSubsequentActionType(0),ricTimeToWait(0),is_ricSubsequentAction(false),is_ricActionDefinition(false){ };
 			 ActionIEs& set_ricSubsequentAction(int subsequentActionType, int timeToWait){
 				 is_ricSubsequentAction = true;
 				 ricSubsequentActionType = subsequentActionType;
@@ -78,6 +79,7 @@ public:
 				 } else {
 					 mdclog_write(MDCLOG_INFO, "Successfully encoded: %s","RIC Action Definition");
 				 }
+				 this->is_ricActionDefinition = true;
 				 return *this;
 			 };
 			 ActionIEs& set_ricActionID(int actionID){ricActionID = actionID; return *this;};
@@ -88,6 +90,7 @@ public:
 			 bool   get_is_ricSubsequentAction() { return this->is_ricSubsequentAction; };
 			 int    get_ricSubsequentActionType(){return this->ricSubsequentActionType; }
 			 int    get_ricTimeToWait(){ return this->ricTimeToWait; }
+			 bool   get_is_ricActionDefinition(){return this->is_ricActionDefinition;};
 			 void*  get_ricActionDefinition(){ return this->ricActionDefinition; };
 			 size_t get_ricActionDefinition_size(){return this->ricActionDefinition_size; };
 
