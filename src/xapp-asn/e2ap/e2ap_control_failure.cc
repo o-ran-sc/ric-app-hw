@@ -102,8 +102,6 @@ bool E2APControlFailure::encode(unsigned char *buf, size_t *size){
 	_e2ap_pdu_obj->choice.unsuccessfulOutcome = _unsuccessMsg;
 	_e2ap_pdu_obj->present = E2AP_PDU_PR_unsuccessfulOutcome ;
 
-	xer_fprint(stdout, &asn_DEF_E2AP_PDU, _e2ap_pdu_obj);
-
 	int ret_constr = asn_check_constraints(&asn_DEF_E2AP_PDU, (void *) _e2ap_pdu_obj, _errbuf, &_errbuf_len);
 	if(ret_constr){
 		_error_string.assign(_errbuf, _errbuf_len);
@@ -127,6 +125,8 @@ bool E2APControlFailure::encode(unsigned char *buf, size_t *size){
 	}
 
 	*size = retval.encoded;
+	xer_fprint(stdout, &asn_DEF_E2AP_PDU, _e2ap_pdu_obj);
+
 	return true;
 
 }
@@ -153,7 +153,7 @@ bool E2APControlFailure::setfields(UnsuccessfulOutcome_t *successMsg){
 	ricrequest_ie->ricInstanceID = this->getIEs().get_ricInstanceID();
 	ASN_SEQUENCE_ADD(&(ric_failure->protocolIEs), ies_ricreq);
 
-	ie_index = 1;
+	ie_index++;
 	RICcontrolFailure_IEs_t *ies_ranfunc = &IE_array[ie_index];
 	ies_ranfunc->criticality = Criticality_reject;
 	ies_ranfunc->id = ProtocolIE_ID_id_RANfunctionID;
@@ -163,7 +163,7 @@ bool E2APControlFailure::setfields(UnsuccessfulOutcome_t *successMsg){
 	*ranfunction_ie = this->getIEs().get_ranFunctionID();
 	ASN_SEQUENCE_ADD(&(ric_failure->protocolIEs), ies_ranfunc);
 
-	ie_index = 2;
+	ie_index++;
 	RICcontrolFailure_IEs_t *ies_ric_cause = &IE_array[ie_index];
 	ies_ric_cause->criticality = Criticality_ignore;
 	ies_ric_cause->id = ProtocolIE_ID_id_Cause;
@@ -187,8 +187,8 @@ bool E2APControlFailure::setfields(UnsuccessfulOutcome_t *successMsg){
 		ric_cause->choice.ricRequest = this->getIEs().get_ricSubCause();
 		break;
 	default:
-		std::cout <<"Error ! Illegal cause enum" << this->getIEs().get_ricCause() << std::endl;
-		return false;
+		 mdclog_write(MDCLOG_INFO, "Error ! Illegal cause enum %ld",this->getIEs().get_ricCause());
+		 return false;
 	}
 	ASN_SEQUENCE_ADD(&(ric_failure->protocolIEs), ies_ric_cause);
 
@@ -234,7 +234,6 @@ bool E2APControlFailure::decode(unsigned char *buf, size_t *size)
 				 mdclog_write(MDCLOG_INFO, "Successfully decoded: %s","RIC Control Ack Message");
 	}
 
-	  xer_fprint(stdout, &asn_DEF_E2AP_PDU, _e2ap_pdu_obj);
 
 	  _unsuccessMsg = _e2ap_pdu_obj->choice.unsuccessfulOutcome;
 	  //write the decoding code.
@@ -304,6 +303,7 @@ bool E2APControlFailure::decode(unsigned char *buf, size_t *size)
 		}
 
 	}
+	//xer_fprint(stdout, &asn_DEF_E2AP_PDU, _e2ap_pdu_obj);
 
 	return true;
 

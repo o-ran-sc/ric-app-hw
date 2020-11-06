@@ -27,12 +27,11 @@
 #include<iostream>
 #include<gtest/gtest.h>
 
-#include "e2ap_control_request.hpp"
-#include "xapp.hpp"
-#include "e2sm_control.hpp"
 #include "e2ap_indication.hpp"
 #include "e2sm_indication.hpp"
 
+#include "e2ap_subscription_request.hpp"
+#include "e2sm_subscription.hpp"
 using namespace std;
 TEST(E2SM, IndicationMessageEncode)
 {
@@ -66,13 +65,14 @@ TEST(E2SM, IndicationMessageEncode)
 
 
 	FILE * pFile;
-	pFile = fopen ("indication2.per","w");
+	pFile = fopen ("indication1.per","w");
 	if (pFile!=NULL)
 	 {
 		  fwrite (buff , sizeof(char), buf_len, pFile);
 	      sleep(2);
 		  fclose (pFile);
-	  }
+		  sleep(2);
+	 }
 
 }
 TEST(E2SM, IndicationMessageDecode)
@@ -87,6 +87,7 @@ TEST(E2SM, IndicationMessageDecode)
 
 	   size_t e2ap_buff_size = fread(e2ap_buff, 1, 4096, fp);
 	   fclose(fp);
+	   sleep(2);
        if(!e2ap_buff_size){
              fprintf(stderr, "%s: Empty or broken\n", filename);
               exit(1);
@@ -118,35 +119,6 @@ TEST(E2SM, IndicationMessageDecode)
 
 }
 
-TEST(E2SM, ControlMessage)
-{
-
-	unsigned char buff[1024];
-	size_t buf_len = 1024;
-
-
-
-	HWControlMessage msgObj;
-	msgObj.set_ricControlMessage("ControlMessage");
-
-	HWControlHeader headObj;
-	headObj.set_ricControlHeader(1);
-
-	E2APControlMessage<HWControlHeader,HWControlMessage>::ControlRequestIEs infoObj;
-	infoObj.set_ranFunctionID(1);
-	infoObj.set_ricRequestorID(1);
-	infoObj.set_ricControlHeader(headObj);
-	infoObj.set_ricControlMessage(msgObj);
-	infoObj.set_ricCallProcessID("ProcessID");
-
-	E2APControlMessage<HWControlHeader,HWControlMessage>  cntrlObj(infoObj);
-
-	bool res = cntrlObj.encode(buff, &buf_len);
-		if(!res)
-		{
-			std::cout << cntrlObj.get_error() << std::endl;
-		}
-		ASSERT_TRUE(res);
-}
+/**/
 
 #endif /* TEST_TEST_ASN_H_ */

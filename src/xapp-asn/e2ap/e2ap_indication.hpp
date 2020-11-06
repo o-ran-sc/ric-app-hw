@@ -225,6 +225,7 @@ E2APIndication<T1,T2>::~E2APIndication(void){
   }
 
   free(IE_array);
+  free(initMsg);
   ASN_STRUCT_FREE(asn_DEF_E2AP_PDU, e2ap_pdu_obj);
   mdclog_write(MDCLOG_DEBUG, "Freed E2AP Indication object memory");
 }
@@ -240,8 +241,6 @@ bool E2APIndication<T1, T2>::decode(unsigned char *buf, size_t *size)
 	} else {
 			 mdclog_write(MDCLOG_INFO, "Successfully decoded: %s","RIC Indication Message");
 	}
-
-  xer_fprint(stdout, &asn_DEF_E2AP_PDU, e2ap_pdu_obj);
 
   initMsg = e2ap_pdu_obj->choice.initiatingMessage;
   //write the decoding code.
@@ -292,6 +291,7 @@ bool E2APIndication<T1, T2>::decode(unsigned char *buf, size_t *size)
       }
 
   }
+  //  xer_fprint(stdout, &asn_DEF_E2AP_PDU, e2ap_pdu_obj);
 
   return true;
 
@@ -319,8 +319,6 @@ bool E2APIndication<T1,T2>::encode(unsigned char *buf, size_t *size){
     return false;
   }
 
-  xer_fprint(stdout, &asn_DEF_E2AP_PDU, e2ap_pdu_obj);
-
   retval = asn_encode_to_buffer(0, ATS_ALIGNED_BASIC_PER, &asn_DEF_E2AP_PDU, e2ap_pdu_obj, buf, *size);
   if(retval.encoded == -1){
     _error_string.assign(strerror(errno));
@@ -337,6 +335,8 @@ bool E2APIndication<T1,T2>::encode(unsigned char *buf, size_t *size){
   }
 
   *size = retval.encoded;
+  xer_fprint(stdout, &asn_DEF_E2AP_PDU, e2ap_pdu_obj);
+
   return true;
 
 }

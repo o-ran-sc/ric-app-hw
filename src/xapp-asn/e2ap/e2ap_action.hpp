@@ -107,5 +107,71 @@ private:
 	int _count_list;
 };
 
+/*RICaction-Admitted-Item ::= SEQUENCE {
+	ricActionID					RICactionID,
+	...
+}
+
+
+RICaction-NotAdmitted-Item ::= SEQUENCE {
+	ricActionID					RICactionID,
+	cause						Cause,
+	...
+}*/
+
+class RICactionAdmittedList{
+
+public:
+	class RICactionAdmittedItemIEs{
+		private:
+			long int ricActionID;
+		public:
+			RICactionAdmittedItemIEs(void):ricActionID(0){};
+			RICactionAdmittedItemIEs& set_ricActionID(long int actID){ricActionID = actID; return *this;};
+			long int get_ricActionID(){return this->ricActionID;};
+
+	};
+	RICactionAdmittedList(){ _ref_list = std::make_unique<std::vector<RICactionAdmittedItemIEs>>(); _count_list = 0;};
+
+	std::vector<RICactionAdmittedItemIEs> * get_list() const {return _ref_list.get();};
+	int get_list_count() {return _count_list;};
+
+	void add(RICactionAdmittedItemIEs &actionObj) { _ref_list.get()->push_back(actionObj); _count_list++;};
+private:
+
+	std::unique_ptr<std::vector<RICactionAdmittedItemIEs>> _ref_list;
+	int _count_list;
+
+};
+
+class RICactionNotAdmittedList{
+ public:
+	class RICactionNotAdmittedItemIEs{
+		private:
+			long int ricActionID;
+			unsigned int ricCause, ricSubCause;
+		public:
+			RICactionNotAdmittedItemIEs(void):ricActionID(0),ricCause(0),ricSubCause(0){};
+			RICactionNotAdmittedItemIEs& set_ricCause(long int cause){ricCause = cause; return *this;};
+			RICactionNotAdmittedItemIEs& set_ricSubCause(long int subcause){ricSubCause = subcause; return *this;};
+			RICactionNotAdmittedItemIEs& set_ricActionID(long int actID){ricActionID = actID; return *this;};
+
+			long int get_ricCause(){return this->ricCause;};
+			long int get_ricSubCause(){return this->ricSubCause;};
+			long int get_ricActionID(){return this->ricActionID;};
+	};
+	RICactionNotAdmittedList(){ _ref_list = std::make_unique<std::vector<RICactionNotAdmittedItemIEs>>(); _count_list = 0;};
+
+	std::vector<RICactionNotAdmittedItemIEs> * get_list() const {return _ref_list.get();};
+	int get_list_count() {return _count_list;};
+
+	void add(RICactionNotAdmittedItemIEs &actionObj) { _ref_list.get()->push_back(actionObj); _count_list++;};
+private:
+
+	std::unique_ptr<std::vector<RICactionNotAdmittedItemIEs>> _ref_list;
+	int _count_list;
+
+};
+
 
 #endif /* XAPP_ASN_REFACTOR_E2AP_ACTION_HPP_ */

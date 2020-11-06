@@ -230,8 +230,6 @@ bool E2APSubscriptionRequest<T1,T2>::encode(unsigned char *buf, size_t *size){
     return false;
   }
 
-  xer_fprint(stdout, &asn_DEF_E2AP_PDU, e2ap_pdu_obj);
-
   asn_enc_rval_t retval = asn_encode_to_buffer(0, ATS_ALIGNED_BASIC_PER, &asn_DEF_E2AP_PDU, e2ap_pdu_obj, buf, *size);
 
   if(retval.encoded == -1){
@@ -250,6 +248,8 @@ bool E2APSubscriptionRequest<T1,T2>::encode(unsigned char *buf, size_t *size){
   }
 
   *size = retval.encoded;
+  xer_fprint(stdout, &asn_DEF_E2AP_PDU, e2ap_pdu_obj);
+
   return true;
 
 }

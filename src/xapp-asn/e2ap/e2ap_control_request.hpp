@@ -210,8 +210,6 @@ bool E2APControlMessage<T1,T2>::encode(unsigned char *buf, size_t *size){
     return false;
   }
 
-  xer_fprint(stdout, &asn_DEF_E2AP_PDU, _e2ap_pdu_obj);
-
   asn_enc_rval_t retval = asn_encode_to_buffer(0, ATS_ALIGNED_BASIC_PER, &asn_DEF_E2AP_PDU, _e2ap_pdu_obj, buf, *size);
 
   if(retval.encoded == -1){
@@ -228,6 +226,8 @@ bool E2APControlMessage<T1,T2>::encode(unsigned char *buf, size_t *size){
   }
 
   *size = retval.encoded;
+  xer_fprint(stdout, &asn_DEF_E2AP_PDU, _e2ap_pdu_obj);
+
   return true;
 
 }
@@ -241,8 +241,8 @@ bool E2APControlMessage<T1,T2>::setfields(InitiatingMessage_t *_initMsg){
     return false;
   }
 
-  RICcontrolRequest_t * E2APControlMessage = &(_initMsg->value.choice.RICcontrolRequest);
-  E2APControlMessage->protocolIEs.list.count = 0;
+  RICcontrolRequest_t * cntrlMsg = &(_initMsg->value.choice.RICcontrolRequest);
+  cntrlMsg->protocolIEs.list.count = 0;
 
 
   // Mandatory IE
@@ -254,7 +254,7 @@ bool E2APControlMessage<T1,T2>::setfields(InitiatingMessage_t *_initMsg){
   RICrequestID_t *ricrequest_ie = &ies_ricreq->value.choice.RICrequestID;
   ricrequest_ie->ricRequestorID = this->getIEs().get_ricRequestorID();
   ricrequest_ie->ricInstanceID = this->getIEs().get_ricInstanceID();
-  ASN_SEQUENCE_ADD(&(E2APControlMessage->protocolIEs), &(IE_array[ie_index]));
+  ASN_SEQUENCE_ADD(&(cntrlMsg->protocolIEs), &(IE_array[ie_index]));
 
   // Mandatory IE
   ie_index = 1;
@@ -264,7 +264,7 @@ bool E2APControlMessage<T1,T2>::setfields(InitiatingMessage_t *_initMsg){
   ies_ranfunc->value.present = RICcontrolRequest_IEs__value_PR_RANfunctionID;
   RANfunctionID_t *ranfunction_ie = &ies_ranfunc->value.choice.RANfunctionID;
   *ranfunction_ie = this->getIEs().get_ranFunctionID();
-  ASN_SEQUENCE_ADD(&(E2APControlMessage->protocolIEs), &(IE_array[ie_index]));
+  ASN_SEQUENCE_ADD(&(cntrlMsg->protocolIEs), &(IE_array[ie_index]));
 
 
   // Mandatory IE
@@ -276,7 +276,7 @@ bool E2APControlMessage<T1,T2>::setfields(InitiatingMessage_t *_initMsg){
   RICcontrolHeader_t *richeader_ie = &ies_richead->value.choice.RICcontrolHeader;
   richeader_ie->buf = (uint8_t*)this->getIEs().get_ricControlHeader();
   richeader_ie->size = this->getIEs().get_ricControlHeaderSize();
-  ASN_SEQUENCE_ADD(&(E2APControlMessage->protocolIEs), &(IE_array[ie_index]));
+  ASN_SEQUENCE_ADD(&(cntrlMsg->protocolIEs), &(IE_array[ie_index]));
 
   // Mandatory IE
   ie_index = 3;
@@ -287,7 +287,7 @@ bool E2APControlMessage<T1,T2>::setfields(InitiatingMessage_t *_initMsg){
   RICcontrolMessage_t *ricmsg_ie = &ies_indmsg->value.choice.RICcontrolMessage;
   ricmsg_ie->buf = (uint8_t*)this->getIEs().get_ricControlMessage();
   ricmsg_ie->size = this->getIEs().get_ricControlMessageSize();
-  ASN_SEQUENCE_ADD(&(E2APControlMessage->protocolIEs), &(IE_array[ie_index]));
+  ASN_SEQUENCE_ADD(&(cntrlMsg->protocolIEs), &(IE_array[ie_index]));
 
   // Optional IE
   ie_index = 4;
@@ -298,7 +298,7 @@ bool E2APControlMessage<T1,T2>::setfields(InitiatingMessage_t *_initMsg){
     ies_indtyp->value.present = RICcontrolRequest_IEs__value_PR_RICcontrolAckRequest;
     RICcontrolAckRequest_t *ricackreq_ie = &ies_indtyp->value.choice.RICcontrolAckRequest;
     *ricackreq_ie = this->getIEs().get_ricControlAckRequest();
-    ASN_SEQUENCE_ADD(&(E2APControlMessage->protocolIEs), &(IE_array[ie_index]));
+    ASN_SEQUENCE_ADD(&(cntrlMsg->protocolIEs), &(IE_array[ie_index]));
   }
 
   // Optional IE
@@ -311,7 +311,7 @@ bool E2APControlMessage<T1,T2>::setfields(InitiatingMessage_t *_initMsg){
     RICcallProcessID_t *riccallprocessid_ie = &ies_callprocid->value.choice.RICcallProcessID;
     riccallprocessid_ie->buf = (uint8_t*)this->getIEs().get_ricCallProcessId();
     riccallprocessid_ie->size = this->getIEs().get_ricCallProcessIdSize();
-    ASN_SEQUENCE_ADD(&(E2APControlMessage->protocolIEs), &(IE_array[ie_index]));
+    ASN_SEQUENCE_ADD(&(cntrlMsg->protocolIEs), &(IE_array[ie_index]));
 
   }
   return true;

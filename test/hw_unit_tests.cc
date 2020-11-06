@@ -26,11 +26,18 @@
 #include<stdlib.h>
 #include<gtest/gtest.h>
 
+#include "xapp.hpp"
+
+#include "test_indc.h"
+#include "test_subs.h"
+#include "test_cntrl.h"
+
+#include "test_e2ap.h"
+
 #include "test_db.h"
 #include "test_rmr.h"
 #include "test_hc.h"
-#include "test_subs.h"
-#include "test_e2sm.h"
+
 
 using namespace std;
 
@@ -59,6 +66,8 @@ int main(int argc, char* argv[])
 	dm_xapp->Run();
 
 	testing::InitGoogleTest(&argc, argv);
+    ::testing::GTEST_FLAG(filter) = "E2AP*";
+
 	int res = RUN_ALL_TESTS();
 
 

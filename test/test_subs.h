@@ -30,14 +30,13 @@
 #include<gtest/gtest.h>
 
 #include "e2ap_subscription_request.hpp"
-#include "e2ap_subsdel_request.hpp"
 #include "xapp.hpp"
 #define BUFFER_SIZE 1024
 
 using namespace std;
 
 //generating a E2AP Subscription Message
-TEST(SubscriptionRequest, MultipleRANParameters)
+TEST(E2SMSubREQ, MultipleRANParameters)
 {
 	unsigned char buff[1024];
 	size_t buff_size = 1024;
@@ -97,7 +96,7 @@ TEST(SubscriptionRequest, MultipleRANParameters)
 	ASSERT_TRUE(res);
 }
 
-TEST(SubscriptionRequest, MultipleActions)
+TEST(E2SMSubREQ, SubRespMultipleActions)
 {
 	unsigned char buff[1024];
 	size_t buff_size = 1024;
@@ -159,29 +158,6 @@ TEST(SubscriptionRequest, MultipleActions)
 		std::cout << requestObj.get_error() << std::endl;
 	}
 	ASSERT_TRUE(res);
-
-}
-
-TEST(E2AP, SubscriptionDeleteRequest){
-
-	unsigned char buff[1024];
-	size_t buff_size = 1024;
-
-
-	E2APSubscriptionDeleteRequest::SubscriptionDeleteRequestIEs dataObj;
-
-	dataObj.set_ranFunctionID(1);
-	dataObj.set_ricInstanceID(1);
-	dataObj.set_ricRequestorID(3);
-
-	E2APSubscriptionDeleteRequest requestObj(dataObj);
-	bool res = requestObj.encode(buff, &buff_size);
-	if(!res)
-	{
-		std::cout << requestObj.get_error() << std::endl;
-	}
-	ASSERT_TRUE(res);
-
 
 }
 

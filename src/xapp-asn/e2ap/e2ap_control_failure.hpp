@@ -84,7 +84,7 @@ public:
 	    long int get_ricInstanceID(){return this->ricInstanceID;};
 	    long int get_ranFunctionID(){return this->ranFunctionID;};
 	    long int get_ricCause(){return this->ricCause;};
-	    long int get_ricSubCause(){return this->ricCause;};
+	    long int get_ricSubCause(){return this->ricSubCause;};
 
 
 	    bool get_is_ricCallProcessId(){return is_ricCallProcessId;};
@@ -117,7 +117,7 @@ public:
 
 	    ControlFailureIEs& set_ricRequestorID(long int reqID){this->ricRequestorID = reqID; return *this;}
 	    ControlFailureIEs& set_ricCause(long int cause){this->ricCause = cause; return *this;}
-	    ControlFailureIEs& set_ricSubCause(long int cause){this->ricCause = cause; return *this;}
+	    ControlFailureIEs& set_ricSubCause(long int cause){this->ricSubCause = cause; return *this;}
 
 	    ControlFailureIEs& set_ricInstanceID(long int reqID){this->ricInstanceID = reqID; return *this;}
 	    ControlFailureIEs& set_ranFunctionID(long int funcID){this->ranFunctionID = funcID; return *this;}

@@ -102,8 +102,6 @@ bool E2APControlAcknowledge::encode(unsigned char *buf, size_t *size){
 	_e2ap_pdu_obj->choice.successfulOutcome = _successMsg;
 	_e2ap_pdu_obj->present = E2AP_PDU_PR_successfulOutcome ;
 
-	xer_fprint(stdout, &asn_DEF_E2AP_PDU, _e2ap_pdu_obj);
-
 	int ret_constr = asn_check_constraints(&asn_DEF_E2AP_PDU, (void *) _e2ap_pdu_obj, _errbuf, &_errbuf_len);
 	if(ret_constr){
 		_error_string.assign(_errbuf, _errbuf_len);
@@ -127,6 +125,8 @@ bool E2APControlAcknowledge::encode(unsigned char *buf, size_t *size){
 	}
 
 	*size = retval.encoded;
+	xer_fprint(stdout, &asn_DEF_E2AP_PDU, _e2ap_pdu_obj);
+
 	return true;
 
 }
@@ -215,8 +215,6 @@ bool E2APControlAcknowledge::decode(unsigned char *buf, size_t *size)
 				 mdclog_write(MDCLOG_INFO, "Successfully decoded: %s","RIC Control Ack Message");
 	}
 
-	  xer_fprint(stdout, &asn_DEF_E2AP_PDU, _e2ap_pdu_obj);
-
 	  _successMsg = _e2ap_pdu_obj->choice.successfulOutcome;
 	  //write the decoding code.
 
@@ -257,6 +255,7 @@ bool E2APControlAcknowledge::decode(unsigned char *buf, size_t *size)
 		}
 
 	}
+//	  xer_fprint(stdout, &asn_DEF_E2AP_PDU, _e2ap_pdu_obj);
 
 	return true;
 

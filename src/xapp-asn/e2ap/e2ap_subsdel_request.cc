@@ -1,5 +1,3 @@
-
-
 /*
 ==================================================================================
         Copyright (c) 2019-2020 AT&T Intellectual Property.
@@ -83,13 +81,13 @@ bool E2APSubscriptionDeleteRequest::encode(unsigned char *buf, size_t *size){
 
   e2ap_pdu_obj->choice.initiatingMessage = initMsg;
   e2ap_pdu_obj->present = E2AP_PDU_PR_initiatingMessage;
-  setfields( initMsg);
+  bool result = setfields( initMsg);
+  if(!result)
+	  return result;
 
   initMsg->procedureCode = ProcedureCode_id_RICsubscriptionDelete;
   initMsg->criticality = Criticality_reject;
   initMsg->value.present = InitiatingMessage__value_PR_RICsubscriptionDeleteRequest;
-
-  xer_fprint(stdout, &asn_DEF_E2AP_PDU, e2ap_pdu_obj);
 
   int ret_constr = asn_check_constraints(&asn_DEF_E2AP_PDU, (void *) e2ap_pdu_obj, _errbuf, &_errbuf_len);
   if(ret_constr){
@@ -116,6 +114,8 @@ bool E2APSubscriptionDeleteRequest::encode(unsigned char *buf, size_t *size){
   }
 
   *size = res.encoded;
+  xer_fprint(stdout, &asn_DEF_E2AP_PDU, e2ap_pdu_obj);
+
   return true;
 
 }
