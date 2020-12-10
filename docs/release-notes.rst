@@ -21,7 +21,7 @@ Version history
 | **Date**           | **Ver.**           | **Author**         | **Comment**        |
 |                    |                    |                    |                    |
 +--------------------+--------------------+--------------------+--------------------+
-| 2020-06-09         | 1.0.6              |   Shraboni Jana    | Sixth draft        |
+| 2020-12-10         | 1.1.0              |   Shraboni Jana    | Seventh draft        |
 |                    |                    |                    |                    |
 +--------------------+--------------------+--------------------+--------------------+
 
@@ -29,9 +29,9 @@ Version history
 
 Summary
 -------
-
-The Bronze release of the HW xAPP demonstrates E2 and A1 interface interactions, persistent storage read-write, RMR and A1 healthcheck. 
-HW xAPP uses its HelloWorld E2SM (can be found at hw/src/xapp-asn/e2sm/) for ASN PDUs.
+The HelloWorld xApp Cherry release has a full implementation of the HW E2 SM including subscription, indication and control as well as C++ class wrappers for all the E2 messages related to HW E2 SM.
+The HW xAPP demonstrates E2 and A1 interface interactions, persistent storage read-write, RMR and A1 healthcheck. 
+HW xAPP uses its HelloWorld E2SM (can be found at hw/docs/).
 
 
 Release Data
@@ -44,10 +44,10 @@ Release Data
 | **Repo/commit-ID**                   |        ric-app/hw                    |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
-| **Release designation**              |              Bronze                  |
+| **Release designation**              |              Cherry                  |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
-| **Release date**                     |      2020-21-05                      |
+| **Release date**                     |      2020-12-11                      |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
 | **Purpose of the delivery**          | open-source Hello World xAPP         |
