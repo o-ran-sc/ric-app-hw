@@ -56,7 +56,7 @@ RUN dpkg -i mdclog_${MDC_VER}_amd64.deb
 RUN dpkg -i mdclog-dev_${MDC_VER}_amd64.deb
 
 # Install RMr using debian package hosted at packagecloud.io
-ARG RMR_VER=4.0.5
+ARG RMR_VER=4.4.6
 RUN wget -nv --content-disposition https://packagecloud.io/o-ran-sc/release/packages/debian/stretch/rmr_${RMR_VER}_amd64.deb/download.deb
 RUN wget -nv --content-disposition https://packagecloud.io/o-ran-sc/release/packages/debian/stretch/rmr-dev_${RMR_VER}_amd64.deb/download.deb
 RUN dpkg -i rmr_${RMR_VER}_amd64.deb
