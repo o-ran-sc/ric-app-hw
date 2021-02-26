@@ -6,7 +6,7 @@ SRC:=../src
 UTILSRC=../src/xapp-utils
 MGMTSRC:=../src/xapp-mgmt
 
-ASNSRC:=../asn1c_defs
+ASNSRC:=../defs_hwe2sm
 E2APSRC:=../src/xapp-asn/e2ap
 E2SMSRC:=../src/xapp-asn/e2sm
 
@@ -26,13 +26,13 @@ XAPPFLAGS= -I$(SRC)
 UTILFLAGS= -I$(UTILSRC)
 MGMTFLAGS= -I$(MGMTSRC)
 
-ASNFLAGS=-I$(ASNSRC) -DASN_DISABLE_OER_SUPPORT
+ASNFLAGS=-I$(ASNSRC) -I/usr/local/include/riclibe2ap -DASN_DISABLE_OER_SUPPORT
 E2APFLAGS = -I$(E2APSRC)
 E2SMFLAGS = -I$(E2SMSRC)
 
 ########libs
 
-LIBS= -lsdl -lrmr_si -lpthread -lm $(LOG_LIBS) $(CURL_LIBS) $(RNIB_LIBS) $(GTEST_LIBS)
+LIBS= -lsdl -lrmr_si -lriclibe2ap -lpthread -lm $(LOG_LIBS) $(CURL_LIBS) $(RNIB_LIBS) $(GTEST_LIBS)
 COV_FLAGS= -fprofile-arcs -ftest-coverage
 
 #######
