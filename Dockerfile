@@ -1,7 +1,7 @@
 #/*
 #==================================================================================
 #
-#        Copyright (c) 2019-2020 AT&T Intellectual Property.
+#        Copyright (c) 2020-2021 AT&T Intellectual Property.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -61,6 +61,14 @@ RUN wget -nv --content-disposition https://packagecloud.io/o-ran-sc/release/pack
 RUN wget -nv --content-disposition https://packagecloud.io/o-ran-sc/release/packages/debian/stretch/rmr-dev_${RMR_VER}_amd64.deb/download.deb
 RUN dpkg -i rmr_${RMR_VER}_amd64.deb
 RUN dpkg -i rmr-dev_${RMR_VER}_amd64.deb
+
+#Install ASN1C library package hosted at packagecloud.io
+ARG ASN1C_VER=0.1.0
+RUN wget --content-disposition https://packagecloud.io/o-ran-sc/staging/packages/debian/stretch/riclibe2ap_${ASN1C_VER}_amd64.deb/download.deb
+RUN wget --content-disposition https://packagecloud.io/o-ran-sc/staging/packages/debian/stretch/riclibe2ap-dev_${ASN1C_VER}_amd64.deb/download.deb
+RUN dpkg -i riclibe2ap_${ASN1C_VER}_amd64.deb
+RUN dpkg -i riclibe2ap-dev_${ASN1C_VER}_amd64.deb
+
 
 #Install RNIB libraries
 ARG RNIB_VER=1.0.0
@@ -123,7 +131,6 @@ COPY init/routes.txt  /etc/xapp/routes.txt
 # #Build the final version
 
 FROM ubuntu:18.04
-
 ARG SCHEMA_PATH
 ARG STAGE_DIR
 
@@ -131,6 +138,7 @@ ARG STAGE_DIR
 COPY --from=ricbuild ${STAGE_DIR}/*.deb /tmp/
 COPY --from=ricbuild /usr/local/lib/librmr_si* /usr/local/lib/
 COPY --from=ricbuild /usr/local/lib/libsdl* /usr/local/lib/
+COPY --from=ricbuild /usr/local/include/riclibe2ap /usr/local/include/
 COPY --from=ricbuild /usr/local/libexec/redismodule/libredis* /usr/local/libexec/redismodule/
 RUN dpkg -i /tmp/*.deb
 RUN apt-get update && \

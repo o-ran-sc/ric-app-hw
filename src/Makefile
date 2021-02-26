@@ -6,7 +6,7 @@ HWSRC:=./
 UTILSRC=./xapp-utils
 MSGSRC:=./xapp-mgmt
 
-ASNSRC:=../asn1c_defs
+ASNSRC:=../defs_hwe2sm
 E2APSRC:=./xapp-asn/e2ap
 E2SMSRC:=./xapp-asn/e2sm
 
@@ -26,13 +26,13 @@ HWFLAGS= -I./
 UTILFLAGS= -I$(UTILSRC)
 MSGFLAGS= -I$(MSGSRC)
 
-ASNFLAGS=-I$(ASNSRC) -DASN_DISABLE_OER_SUPPORT
+ASNFLAGS=-I$(ASNSRC) -I/usr/local/include/riclibe2ap -DASN_DISABLE_OER_SUPPORT
 E2APFLAGS = -I$(E2APSRC)
 E2SMFLAGS = -I$(E2SMSRC)
 
 ########libs
 
-LIBS= -lsdl -lrmr_si  -lpthread -lm $(LOG_LIBS) $(CURL_LIBS) $(RNIB_LIBS)
+LIBS= -lsdl -lrmr_si -lriclibe2ap -lpthread -lm $(LOG_LIBS) $(CURL_LIBS) $(RNIB_LIBS)
 COV_FLAGS= -fprofile-arcs -ftest-coverage
 
 #######
@@ -70,7 +70,7 @@ OBJ= $(HWXAPP_OBJ) $(UTIL_OBJ) $(MSG_OBJ)  $(ASN1C_MODULES) $(E2AP_OBJ) $(E2SM_O
 print-%  : ; @echo $* = $($*)
 
 hw_xapp_main: $(OBJ)
-	$(CXX) -o $@  $(OBJ) $(LIBS) $(RNIBFLAGS) $(CPPFLAGS) $(CLOGFLAGS) 
+	$(CXX) -o $@  $(OBJ) $(LIBS) $(RNIBFLAGS) $(CPPFLAGS) $(CLOGFLAGS)  
 
 install: hw_xapp_main
 	install  -D hw_xapp_main  /usr/local/bin/hw_xapp_main
