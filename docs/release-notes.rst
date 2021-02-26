@@ -21,7 +21,7 @@ Version history
 | **Date**           | **Ver.**           | **Author**         | **Comment**        |
 |                    |                    |                    |                    |
 +--------------------+--------------------+--------------------+--------------------+
-| 2020-12-10         | 1.1.0              |   Shraboni Jana    | Seventh draft      |
+| 2021-02-26         | 1.1.1              |   Shraboni Jana    | Eighth draft       |
 |                    |                    |                    |                    |
 +--------------------+--------------------+--------------------+--------------------+
 
@@ -29,7 +29,7 @@ Version history
 
 Summary
 -------
-The HelloWorld xApp Cherry release has a full implementation of the HW E2 SM including subscription, indication and control as well as C++ class wrappers for all the E2 messages related to HW E2 SM.
+The HelloWorld xApp Dawn release has a full implementation of the HW E2 SM including subscription, indication and control as well as C++ class wrappers for all the E2 messages related to HW E2 SM.
 The HW xAPP demonstrates E2 and A1 interface interactions, persistent storage read-write, RMR and A1 healthcheck. 
 HW xAPP uses its HelloWorld E2SM (can be found at hw/docs/).
 
@@ -44,10 +44,10 @@ Release Data
 | **Repo/commit-ID**                   |        ric-app/hw                    |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
-| **Release designation**              |              Cherry                  |
+| **Release designation**              |              Dawn                    |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
-| **Release date**                     |      2020-12-11                      |
+| **Release date**                     |      2021-02-26                      |
 |                                      |                                      |
 +--------------------------------------+--------------------------------------+
 | **Purpose of the delivery**          | open-source Hello World xAPP         |
@@ -67,7 +67,7 @@ Components
 
 - *test/* contains unit tests showing how to use various components.
 
-  
+- *defs_hwe2sm/* contains helloworld e2sm asn1c definitions  
     
 
 Limitations
